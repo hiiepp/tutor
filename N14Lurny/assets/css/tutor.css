@@ -1,0 +1,265 @@
+/* =========================================
+   1. VARIABLES & RESET
+   ========================================= */
+:root {
+  --brand-color: #80BA4C;        
+  --brand-dark: #6da53e;          
+  
+  --primary-color: #80BA4C;       
+  --primary-dark: #5c8a32;        
+  
+  --text-dark: #0f172a;
+  --text-gray: #64748b;
+  --bg-body: #f1f5f9;
+  --bg-light: #f8fafc;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #10b981;
+  --border-color: #e2e8f0;
+  --radius: 12px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-body);
+  color: var(--text-dark);
+}
+
+a { text-decoration: none; color: inherit; transition: 0.2s; }
+ul { list-style: none; padding: 0; margin: 0; }
+
+/* =========================================
+   2. OVERRIDE BOOTSTRAP COLORS (QUAN TRỌNG)
+   ========================================= */
+.text-primary {
+    color: var(--primary-dark) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+.btn-primary:hover {
+    background-color: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+.btn-outline-primary:hover {
+    background-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+/* =========================================
+   3. COMPONENTS (THÀNH PHẦN)
+   ========================================= */
+
+.card, .form-card {
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+  overflow: hidden; 
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transition: box-shadow 0.3s ease;
+}
+
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+.badge.blue { background: #e0f2fe; color: #0284c7; } 
+.badge.green { background: #dcfce7; color: #16a34a; }
+.badge.gray { background: #f1f5f9; color: #64748b; }
+.badge.red { background: #fee2e2; color: #dc2626; }
+
+.btn-brand {
+  background-color: var(--brand-color);
+  color: white;
+  font-weight: 600;
+}
+.btn-brand:hover {
+  background-color: var(--brand-dark);
+  color: white;
+}
+
+.form-header {
+    background: linear-gradient(135deg, var(--brand-color) 0%, #4a8a2a 100%);
+    color: white;
+    padding: 20px 30px;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-dark); 
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-title i {
+    color: var(--brand-color);
+    font-size: 1.3rem;
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.form-control, .form-select {
+    padding: 10px 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #334155;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--brand-color);
+    box-shadow: 0 0 0 4px rgba(128, 186, 76, 0.25); 
+}
+
+.input-group-text {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+    color: #64748b;
+}
+
+textarea.form-control {
+    height: auto !important;
+    min-height: 120px;
+}
+
+.back-link {
+    color: var(--brand-color);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.back-link:hover { color: var(--brand-dark); }
+
+.text-brand { color: var(--brand-color) !important; }
+
+.icon-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    margin-right: 6px;
+    font-size: 12px;
+}
+
+@media (min-width: 992px) {
+    .sticky-sidebar {
+        position: sticky;
+        top: 20px;
+        z-index: 10;
+    }
+}
+
+/* =========================================
+   4. PAGE SPECIFIC: SEE DETAILS (CHI TIẾT LỚP)
+   ========================================= */
+
+.avatar-circle {
+  width: 80px;
+  height: 80px;
+  background-color: var(--brand-color); 
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: 0 auto 15px auto;
+  box-shadow: 0 4px 6px rgba(128, 186, 76, 0.3); 
+}
+
+.card-detail {
+  border: none;
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius);
+  background: white;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.section-title i {
+    color: var(--brand-color); 
+    font-size: 1.2rem;
+}
+
+.info-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--border-color);
+}
+.info-list-item:last-child {
+  border-bottom: none;
+}
+
+
+/* =========================================
+   5. PAGE SPECIFIC: CLASS MANAGEMENT
+   ========================================= */
+
+@media (min-width: 768px) { 
+    .border-start-md { border-left: 1px dashed var(--border-color); } 
+}
+
+.hover-brand:hover { color: var(--brand-color) !important; }
+
+.hover-danger:hover { 
+    background: #fee2e2; 
+    border-color: #fca5a5; 
+    color: var(--danger) !important;
+}
+
+.disabled-cursor {
+    cursor: not-allowed !important;
+    opacity: 0.6;
+}
+
+.card.opacity-75 {
+    background-color: #f8fafc;
+}

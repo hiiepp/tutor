@@ -1,0 +1,86 @@
+
+/* assets/css/style.css */
+
+/* --- CẤU TRÚC ADMIN MỚI (MENU NGANG) --- */
+.admin-wrapper {
+    display: block; /* QUAN TRỌNG: Đổi từ flex sang block để menu nằm trên cùng */
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f4f6f9; /* Màu nền xám nhạt toàn trang */
+}
+
+/* Tùy chỉnh thanh Navbar Admin */
+.admin-navbar {
+    background-color: #212529; /* Màu đen sang trọng */
+    padding: 0.8rem 1rem;
+    margin-bottom: 20px; /* Tạo khoảng cách với nội dung bên dưới */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.admin-brand {
+    font-weight: bold;
+    font-size: 1.25rem;
+    color: #fff !important;
+}
+
+/* Link trong menu */
+.admin-navbar .nav-link {
+    color: rgba(255,255,255,0.75) !important;
+    font-weight: 500;
+    margin-right: 15px;
+    border-radius: 5px;
+    transition: all 0.2s;
+}
+
+.admin-navbar .nav-link:hover {
+    color: #fff !important;
+    background-color: rgba(255,255,255,0.15);
+}
+
+/* Trạng thái đang chọn (Active) */
+.admin-navbar .nav-link.active {
+    color: #fff !important;
+    background-color: #0d6efd; /* Xanh dương nổi bật */
+}
+
+/* Nút đăng xuất bên phải */
+.btn-logout {
+    border: 1px solid #ff6b6b;
+    color: #ff6b6b !important;
+    border-radius: 20px;
+    padding: 5px 20px !important;
+    font-size: 0.9rem;
+}
+.btn-logout:hover {
+    background-color: #ff6b6b;
+    color: white !important;
+}
+
+/* Phần nội dung chính */
+.admin-content {
+    padding: 0 30px 30px 30px; /* Cách lề cho thoáng */
+    max-width: 1400px; /* Giới hạn chiều rộng để nhìn không bị loãng trên màn hình to */
+    margin: 0 auto; /* Căn giữa nội dung */
+}
+
+/* Card thống kê */
+.card-counter {
+    padding: 20px;
+    border-radius: 8px;
+    color: white;
+    margin-bottom: 20px;
+}
+/* --- NÚT PASTEL GREEN CUSTOM --- */
+.btn-pastel-green {
+    background-color: #78e08f !important; /* Màu xanh pastel */
+    color: #0a3d32 !important;            /* Chữ màu rêu đậm cho dễ đọc */
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-pastel-green:hover {
+    background-color: #38ada9 !important; /* Đậm hơn khi di chuột */
+    color: #fff !important;               /* Chữ chuyển sang trắng */
+    transform: translateY(-2px);          /* Hiệu ứng nổi lên nhẹ */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
