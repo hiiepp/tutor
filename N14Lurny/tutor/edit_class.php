@@ -2,6 +2,9 @@
 include '../includes/header_tutor.php'; 
 require_once '../config/db.php';
 
+// 1. THIẾT LẬP MÚI GIỜ
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 if (!isset($_GET['id'])) {
     header("Location: class_management.php");
     exit();
@@ -22,7 +25,7 @@ if (!$class) {
     include '../includes/footer.php'; exit();
 }
 
-// Xử lý giá
+// Xử lý giá tiền
 $price_val = ''; $unit = 'VND/Buổi'; 
 $price_raw = $class['price']; 
 if (preg_match('/(\d+)\s+(.*)/', $price_raw, $matches)) {
@@ -31,15 +34,21 @@ if (preg_match('/(\d+)\s+(.*)/', $price_raw, $matches)) {
     $price_val = intval($price_raw);
 }
 
-// Xử lý mô tả
+// Xử lý mô tả (Tách ngược lại để điền vào form)
 $full_desc = $class['description'];
-$mo_ta_part = $full_desc; $so_hoc_vien = '1'; $lich_hoc = ''; $yeu_cau = '';
-if (strpos($full_desc, 'Số học viên:') !== false) {
-    if (preg_match('/Mô tả: (.*?)(?=\nSố học viên:|$)/s', $full_desc, $m)) $mo_ta_part = trim($m[1]);
-    if (preg_match('/Số học viên: (.*?)(?=\nLịch học:|$)/s', $full_desc, $m)) $so_hoc_vien = trim($m[1]);
+$mo_ta_part = $full_desc; 
+$lich_hoc = ''; 
+$yeu_cau = '';
+
+// Regex để lấy các phần mô tả cũ
+if (strpos($full_desc, 'Mô tả:') !== false) {
+    if (preg_match('/Mô tả: (.*?)(?=\nLịch học:|$)/s', $full_desc, $m)) $mo_ta_part = trim($m[1]);
     if (preg_match('/Lịch học: (.*?)(?=\nYêu cầu:|$)/s', $full_desc, $m)) $lich_hoc = trim($m[1]);
     if (preg_match('/Yêu cầu: (.*?)$/s', $full_desc, $m)) $yeu_cau = trim($m[1]);
 }
+
+// --- QUAN TRỌNG: Lấy số học viên từ cột DB, không phải từ mô tả ---
+$so_hoc_vien = $class['max_students'];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = $_POST['tieu_de'];
@@ -48,12 +57,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $method = $_POST['hinh_thuc'];
     $location = $_POST['khu_vuc_final'];
     
-    $price_str = $_POST['hoc_phi'] . ' ' . $_POST['don_vi'];
-    $description_str = "Mô tả: " . $_POST['mo_ta'] . "\nSố học viên: " . $_POST['so_hoc_vien'] . "\nLịch học: " . $_POST['lich_hoc'] . "\nYêu cầu: " . $_POST['yeu_cau'];
+    $start_date = $_POST['ngay_bat_dau'];
+    $end_date = $_POST['ngay_ket_thuc'];
+    
+    // Lấy số lượng mới
+    $max_students = intval($_POST['so_hoc_vien']);
 
-    $update_sql = "UPDATE classes SET title=?, subject=?, grade=?, method=?, location=?, price=?, description=? WHERE id=? AND tutor_id=?";
+    $date1 = new DateTime($start_date);
+    $date2 = new DateTime($end_date);
+    $interval = $date1->diff($date2);
+    if ($date1 > $date2 || $interval->days < 7) {
+        echo "<script>alert('Lỗi: Ngày kết thúc phải sau ngày bắt đầu ít nhất 1 tuần!'); window.history.back();</script>";
+        exit();
+    }
+    
+    $price_str = $_POST['hoc_phi'] . ' ' . $_POST['don_vi'];
+    
+    // Không cần lưu "Số học viên" vào text nữa, chỉ lưu các thông tin text khác
+    $description_str = "Mô tả: " . $_POST['mo_ta'] . "\n" .
+                       "Lịch học: " . $_POST['lich_hoc'] . "\n" .
+                       "Yêu cầu: " . $_POST['yeu_cau'];
+
+    // --- CẬP NHẬT UPDATE SQL: THÊM max_students ---
+    $update_sql = "UPDATE classes SET title=?, subject=?, grade=?, method=?, location=?, price=?, description=?, max_students=?, start_date=?, end_date=? WHERE id=? AND tutor_id=?";
     $update_stmt = $conn->prepare($update_sql);
-    $update_stmt->bind_param("sssssssii", $title, $subject, $grade, $method, $location, $price_str, $description_str, $class_id, $tutor_id);
+    // type: sssssssissii (12 params)
+    $update_stmt->bind_param("sssssssissii", $title, $subject, $grade, $method, $location, $price_str, $description_str, $max_students, $start_date, $end_date, $class_id, $tutor_id);
     
     if ($update_stmt->execute()) {
         echo "<script>alert('Cập nhật thành công!'); window.location.href='class_management.php';</script>";
@@ -78,7 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="row justify-content-center">
         <div class="col-md-11 col-lg-10 col-xl-9">
 
-            <form method="post" class="form-card bg-white shadow-sm">
+            <form method="post" class="form-card bg-white shadow-sm" onsubmit="return validateDates()">
                 <div class="form-header py-4 px-4 px-md-5">
                     <h3 class="m-0 fw-bold"><i class="bi bi-pencil-square me-2"></i> Chỉnh sửa thông tin lớp</h3>
                 </div>
@@ -93,7 +122,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <label class="form-label">Tiêu đề yêu cầu <span class="text-danger">*</span></label>
                             <input type="text" name="tieu_de" class="form-control form-control-lg" value="<?= htmlspecialchars($class['title']) ?>" required>
                         </div>
-
                         <div class="row g-4">
                             <div class="col-12 col-md-6">
                                 <label class="form-label">Môn học</label>
@@ -126,10 +154,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     <option value="Online" <?= $class['method'] == 'Online' ? 'selected' : '' ?>>Online (Trực tuyến)</option>
                                 </select>
                             </div>
+                            
                             <div class="col-12 col-md-6">
-                                <label class="form-label">Số học viên</label>
-                                <input type="number" name="so_hoc_vien" class="form-control form-control-lg" value="<?= htmlspecialchars($so_hoc_vien) ?>">
+                                <label class="form-label">Số lượng học viên tối đa</label>
+                                <input type="number" name="so_hoc_vien" class="form-control form-control-lg" value="<?= htmlspecialchars($so_hoc_vien) ?>" min="1" required>
                             </div>
+
                             <div class="col-12">
                                 <label class="form-label mt-2">Mô tả chi tiết / Mục tiêu</label>
                                 <textarea name="mo_ta" class="form-control" rows="5"><?= htmlspecialchars($mo_ta_part) ?></textarea>
@@ -139,15 +169,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     <div class="mb-5">
                         <div class="section-title text-primary fs-5 border-bottom pb-2 mb-4">
-                            <i class="bi bi-geo-alt me-2"></i> 2. Địa điểm & Thời gian
+                            <i class="bi bi-calendar-range me-2"></i> 2. Thời gian & Địa điểm
                         </div>
                         
+                        <div class="row g-3 mb-4 p-3 bg-light rounded border">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Ngày bắt đầu dự kiến</label>
+                                <input type="date" name="ngay_bat_dau" id="startDate" class="form-control form-control-lg" 
+                                       value="<?= $class['start_date'] ?>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Ngày kết thúc dự kiến</label>
+                                <input type="date" name="ngay_ket_thuc" id="endDate" class="form-control form-control-lg" 
+                                       value="<?= $class['end_date'] ?>" required>
+                                <div class="form-text text-danger d-none" id="dateError">Ngày kết thúc phải sau ngày bắt đầu ít nhất 1 tuần.</div>
+                            </div>
+                        </div>
+
                         <input type="hidden" id="oldLocation" value="<?= htmlspecialchars($class['location']) ?>">
                         <input type="hidden" name="khu_vuc_final" id="finalLocation" value="<?= htmlspecialchars($class['location']) ?>">
 
                         <div id="onlineInputGroup" class="d-none mb-3">
                             <label class="form-label">Link lớp học</label>
-                            <input type="text" id="onlineLink" class="form-control form-control-lg" placeholder="Dán link lớp học...">
+                            <input type="text" id="onlineLink" class="form-control form-control-lg" placeholder="Link Microsoft Teams / Zoom...">
                         </div>
 
                         <div id="offlineInputGroup" class="row g-3 mb-3">
@@ -155,19 +199,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <div class="badge bg-primary mb-2">Khu vực: TP. Hồ Chí Minh</div>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Quận / Huyện (Cũ)</label>
                                 <select id="districtSelect" class="form-select form-select-lg">
                                     <option value="">-- Chọn Quận --</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Phường / Xã</label>
                                 <select id="wardSelect" class="form-select form-select-lg">
                                     <option value="">-- Chọn Phường --</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Số nhà, Đường</label>
                                 <input type="text" id="streetInput" class="form-control form-control-lg" placeholder="VD: 10 Nguyễn Huệ">
                             </div>
                         </div>
@@ -213,7 +254,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 
 <script>
-// DỮ LIỆU TP.HCM (CẤU TRÚC CŨ: Q2, Q9, Q.Thủ Đức)
+// --- LOGIC VALIDATE NGÀY ---
+function validateDates() {
+    const startDate = new Date(document.getElementById('startDate').value);
+    const endDate = new Date(document.getElementById('endDate').value);
+    const errorMsg = document.getElementById('dateError');
+
+    if (!startDate || !endDate) return true;
+
+    const diffTime = endDate - startDate;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+    if (diffDays < 7) {
+        errorMsg.classList.remove('d-none');
+        document.getElementById('endDate').classList.add('is-invalid');
+        prepareLocationData(); // Vẫn gọi để xử lý địa chỉ nhưng trả về false
+        return false; 
+    } else {
+        errorMsg.classList.add('d-none');
+        document.getElementById('endDate').classList.remove('is-invalid');
+        return prepareLocationData();
+    }
+}
+
+// ... (Copy toàn bộ script hcmDataOld, parseOldLocation... từ file edit_class.php trước đó vào đây) ...
+// DỮ LIỆU TP.HCM (CẤU TRÚC CŨ: Giữ nguyên Q2, Q9, Q.Thủ Đức)
 const hcmDataOld = {
     "Quận 1": ["Phường Tân Định", "Phường Đa Kao", "Phường Bến Nghé", "Phường Bến Thành", "Phường Nguyễn Thái Bình", "Phường Phạm Ngũ Lão", "Phường Cầu Ông Lãnh", "Phường Cô Giang", "Phường Nguyễn Cư Trinh", "Phường Cầu Kho"],
     "Quận 2": ["Phường Thảo Điền", "Phường An Phú", "Phường Bình An", "Phường Bình Trưng Đông", "Phường Bình Trưng Tây", "Phường Bình Khánh", "Phường An Khánh", "Phường Cát Lái", "Phường Thạnh Mỹ Lợi", "Phường An Lợi Đông", "Phường Thủ Thiêm"],

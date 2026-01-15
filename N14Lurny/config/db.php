@@ -3,7 +3,7 @@ $host = 'localhost';
 $user = 'root';
 $pass = '';
 $db_name = 'tutor_db';
-$port = 3307; 
+$port = 3306; 
 $conn = new mysqli($host, $user, $pass, $db_name, $port);
 
 if ($conn->connect_error) {

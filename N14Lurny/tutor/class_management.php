@@ -2,14 +2,18 @@
 include '../includes/header_tutor.php'; 
 require_once '../config/db.php';
 
+// 1. THIẾT LẬP MÚI GIỜ VIỆT NAM
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../auth/login_register.php");
     exit();
 }
 
 $tutor_id = $_SESSION['user_id'];
+$today = date('Y-m-d'); 
 
-// Lấy danh sách lớp + Đếm số học viên đã nhận
+// Lấy danh sách lớp
 $sql = "SELECT c.*, 
        (SELECT COUNT(*) FROM class_registrations r WHERE r.class_id = c.id AND r.status = 'accepted') as accepted_count
        FROM classes c 
@@ -20,6 +24,174 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $tutor_id);
 $stmt->execute();
 $result = $stmt->get_result();
+
+// --- 2. PHÂN LOẠI LỚP ---
+$list_pending = [];   
+$list_upcoming = [];  
+$list_ongoing = [];   
+$list_hidden = [];    
+$list_rejected = [];  
+
+while ($row = $result->fetch_assoc()) {
+    $has_students = ($row['accepted_count'] > 0);
+    $is_started = (!empty($row['start_date']) && $row['start_date'] <= $today);
+
+    if ($row['status'] == 'pending') {
+        $list_pending[] = $row;
+    } 
+    elseif ($row['status'] == 'rejected') {
+        $list_rejected[] = $row;
+    }
+    elseif ($row['status'] == 'hidden' || $row['status'] == 'closed') {
+        if ($has_students) {
+            if ($is_started) $list_ongoing[] = $row;
+            else $list_upcoming[] = $row;
+        } else {
+            $list_hidden[] = $row;
+        }
+    } 
+    elseif ($row['status'] == 'active') {
+        if ($has_students && $is_started) $list_ongoing[] = $row;
+        else $list_upcoming[] = $row;
+    }
+}
+
+// --- HÀM RENDER GIAO DIỆN ---
+function renderClassCard($row, $type) {
+    global $today;
+    
+    $price_display = is_numeric($row['price']) ? number_format($row['price'], 0, ',', '.') . ' đ' : $row['price'];
+    $date_range = (!empty($row['start_date']) && !empty($row['end_date'])) 
+                  ? date('d/m/Y', strtotime($row['start_date'])) . " - " . date('d/m/Y', strtotime($row['end_date'])) 
+                  : "Chưa cập nhật";
+
+    $max = $row['max_students'] ?? 1;
+    $current = $row['accepted_count'];
+    $is_full = ($current >= $max);
+    $is_started = (!empty($row['start_date']) && $row['start_date'] <= $today);
+    $db_status = $row['status'];
+    $has_students = ($current > 0);
+
+    // --- LOGIC XÓA MỚI: Chỉ cần có học viên là khóa nút xóa ---
+    $can_delete = !$has_students;
+
+    $status_label = '';
+    $border_class = 'border-0';
+    $opacity = '';
+
+    if ($type == 'pending') {
+        $status_label = '<span class="badge bg-warning text-dark">⏳ Chờ Admin duyệt</span>';
+    } elseif ($type == 'rejected') {
+        $status_label = '<span class="badge bg-danger">🚫 Bị từ chối</span>';
+        $opacity = 'opacity-75';
+    } elseif ($type == 'hidden') {
+        $status_label = '<span class="badge bg-secondary"><i class="bi bi-eye-slash-fill"></i> Đang ẩn (Trống)</span>';
+        $opacity = 'opacity-75 bg-light';
+    } else {
+        if ($db_status == 'hidden' || $db_status == 'closed') {
+            $status_label = '<span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> Đã khóa sổ</span>';
+        } else {
+            $status_label = '<span class="badge bg-primary"><i class="bi bi-megaphone"></i> Đang tuyển sinh</span>';
+        }
+        
+        if($type == 'ongoing') $border_class = 'border-success border-start border-4';
+        else $border_class = 'border-primary border-start border-4';
+    }
+
+    if ($is_full && $type != 'rejected' && $db_status != 'hidden') {
+        $status_label .= ' <span class="badge bg-danger ms-1">Đã đủ HV</span>';
+    }
+    ?>
+    
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm <?php echo $border_class . ' ' . $opacity; ?>">
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    
+                    <div class="col-md-8">
+                        <div class="mb-2">
+                            <span class="badge blue"><?= htmlspecialchars($row['subject']) ?></span>
+                            <span class="badge gray"><?= htmlspecialchars($row['method']) ?></span>
+                            <?= $status_label ?>
+                        </div>
+                        
+                        <h5 class="fw-bold mb-2">
+                            <a href="see_details.php?id=<?= $row['id'] ?>" class="text-dark text-decoration-none hover-brand">
+                                <?= htmlspecialchars($row['title']) ?>
+                            </a>
+                        </h5>
+
+                        <div class="d-flex flex-wrap gap-4 text-muted small mt-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-people-fill me-2 text-info"></i> 
+                                <span>Học viên: <strong><?= $current ?>/<?= $max ?></strong></span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-geo-alt me-2 text-primary"></i> 
+                                <span class="text-truncate" style="max-width: 200px;"><?= htmlspecialchars($row['location']) ?></span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar-range me-2 text-danger"></i> <?= $date_range ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 border-start-md ps-md-4 mt-3 mt-md-0">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            
+                            <a href="see_details.php?id=<?= $row['id'] ?>" class="btn btn-outline-primary btn-sm px-3" title="Xem chi tiết">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            
+                            <?php if ($is_started || $is_full || $type == 'rejected'): ?>
+                                <button class="btn btn-light btn-sm px-3 border disabled" title="Không thể sửa khi lớp đã bắt đầu hoặc đủ học viên">
+                                    <i class="bi bi-pencil text-muted"></i>
+                                </button>
+                            <?php else: ?>
+                                <a href="edit_class.php?id=<?= $row['id'] ?>" class="btn btn-light btn-sm px-3 border" title="Sửa thông tin">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            <?php endif; ?>
+
+                            <?php if ($db_status == 'active'): ?>
+                                <a href="update_status.php?id=<?= $row['id'] ?>&action=close" 
+                                   class="btn btn-warning btn-sm px-3 text-dark border" 
+                                   onclick="return confirm('Khóa lớp này? Học viên mới sẽ không thấy nữa.')" 
+                                   title="Khóa lớp">
+                                    <i class="bi bi-lock-fill"></i>
+                                </a>
+                            <?php elseif ($db_status == 'hidden' || $db_status == 'closed'): ?>
+                                <?php if ($is_full): ?>
+                                    <button class="btn btn-secondary btn-sm px-3 border" disabled title="Lớp đã đủ học viên">
+                                        <i class="bi bi-unlock"></i>
+                                    </button>
+                                <?php else: ?>
+                                    <a href="update_status.php?id=<?= $row['id'] ?>&action=open" 
+                                       class="btn btn-success btn-sm px-3 border" 
+                                       title="Mở lại lớp">
+                                        <i class="bi bi-unlock-fill"></i>
+                                    </a>
+                                <?php endif; ?>
+                            <?php endif; ?>
+
+                            <?php if ($can_delete): ?>
+                                <a href="delete_class.php?id=<?= $row['id'] ?>" class="btn btn-light btn-sm px-3 text-danger border hover-danger" onclick="return confirm('CẢNH BÁO: Xóa vĩnh viễn?')" title="Xóa">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            <?php else: ?>
+                                <button class="btn btn-light btn-sm px-3 border disabled text-muted" title="Lớp đã có học viên, không thể xóa!">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            <?php endif; ?>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php
+}
 ?>
 
 <!DOCTYPE html>
@@ -30,138 +202,112 @@ $result = $stmt->get_result();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/tutor.css">
+    <style>
+        .nav-tabs .nav-link { color: #6c757d; font-weight: 600; border: none; border-bottom: 3px solid transparent; }
+        .nav-tabs .nav-link.active { color: #198754; border-bottom: 3px solid #198754; background: none; }
+        .nav-tabs .nav-link:hover { color: #198754; }
+        .empty-state { padding: 40px 0; text-align: center; color: #aaa; }
+        .btn-warning { background-color: #ffc107; border-color: #ffc107; }
+    </style>
 </head>
 <body class="bg-light">
 
 <div class="container py-5">
     
-    <?php if (isset($_GET['msg']) && $_GET['msg'] == 'class_full'): ?>
-        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> Không thể mở lại lớp! Lớp học đã đủ số lượng học viên.
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
         <div>
             <h3 class="fw-bold mb-1 text-dark">Quản lý lớp học</h3>
-            <p class="text-muted mb-0">Danh sách các lớp bạn đã đăng</p>
+            <p class="text-muted mb-0">Theo dõi trạng thái các lớp học của bạn</p>
         </div>
         <a href="new_class.php" class="btn btn-brand px-4 py-2 shadow-sm">
             <i class="bi bi-plus-lg me-1"></i> Đăng lớp mới
         </a>
     </div>
 
-    <?php if ($result->num_rows > 0): ?>
-        <?php while($row = $result->fetch_assoc()): 
-            $max_students = $row['max_students'] ?? 1; 
-            $is_full = ($row['accepted_count'] >= $max_students);
-            
-            // Xử lý hiển thị Giá (Format lại cho đẹp)
-            $price_display = is_numeric($row['price']) ? number_format($row['price'], 0, ',', '.') . ' đ' : $row['price'];
-        ?>
-            <div class="card p-0 mb-4 border-0 shadow-sm <?php echo ($row['status'] == 'hidden' || $row['status'] == 'rejected') ? 'opacity-75 bg-light' : ''; ?>">
-                <div class="card-body p-4">
-                    <div class="row g-4 align-items-center">
-                        <div class="col-md-8">
-                            <div class="mb-2">
-                                <span class="badge blue"><?= htmlspecialchars($row['subject']) ?></span>
-                                <span class="badge gray"><i class="bi bi-laptop"></i> <?= htmlspecialchars($row['method']) ?></span>
-                                
-                                <?php if($row['status'] == 'active'): ?>
-                                    <span class="badge green">● Đang tìm</span>
-                                <?php elseif($row['status'] == 'pending'): ?>
-                                    <span class="badge bg-warning text-dark">⏳ Chờ duyệt</span>
-                                <?php elseif($row['status'] == 'rejected'): ?>
-                                    <span class="badge bg-danger">🚫 Bị từ chối</span>
-                                <?php else: ?>
-                                    <span class="badge gray">🔒 Đã đóng</span>
-                                <?php endif; ?>
+    <ul class="nav nav-tabs mb-4" id="classTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button">
+                Chờ dạy (<?= count($list_upcoming) ?>)
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="ongoing-tab" data-bs-toggle="tab" data-bs-target="#ongoing" type="button">
+                Đang dạy (<?= count($list_ongoing) ?>)
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="hidden-tab" data-bs-toggle="tab" data-bs-target="#hidden" type="button">
+                Đang ẩn (<?= count($list_hidden) ?>)
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button">
+                Chờ duyệt (<?= count($list_pending) + count($list_rejected) ?>)
+            </button>
+        </li>
+    </ul>
 
-                                <?php if($is_full && $row['status'] != 'rejected'): ?>
-                                    <span class="badge bg-secondary text-white ms-1">Đã đủ học viên (<?= $row['accepted_count'] ?>/<?= $max_students ?>)</span>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <h5 class="fw-bold mb-2">
-                                <a href="see_details.php?id=<?= $row['id'] ?>" class="text-dark text-decoration-none hover-brand">
-                                    <?= htmlspecialchars($row['title']) ?>
-                                </a>
-                            </h5>
-
-                            <div class="d-flex flex-wrap gap-3 text-muted small mt-3">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-geo-alt me-2 text-primary"></i> <?= htmlspecialchars($row['location']) ?>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-cash-coin me-2 text-success"></i> <?= $price_display ?>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-calendar3 me-2"></i> <?= date('d/m/Y', strtotime($row['created_at'])) ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4 border-start-md ps-md-4">
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <a href="see_details.php?id=<?= $row['id'] ?>" class="btn btn-outline-primary btn-sm px-3" title="Xem chi tiết">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-
-                                <a href="edit_class.php?id=<?= $row['id'] ?>" class="btn btn-light btn-sm px-3 border" title="Sửa thông tin">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-
-                                <?php if($row['status'] == 'pending'): ?>
-                                    <button class="btn btn-secondary btn-sm px-3 border disabled" disabled title="Bài đăng đang chờ Admin duyệt">
-                                        <i class="bi bi-hourglass-split"></i> Chờ duyệt
-                                    </button>
-
-                                <?php elseif($row['status'] == 'active'): ?>
-                                    <a href="update_status.php?id=<?= $row['id'] ?>&action=close" 
-                                       class="btn btn-warning btn-sm px-3 text-dark border" 
-                                       onclick="return confirm('Bạn muốn tạm khóa lớp này? Học sinh sẽ không tìm thấy lớp nữa.')" title="Khóa lớp">
-                                        <i class="bi bi-lock-fill"></i>
-                                    </a>
-                                
-                                <?php elseif($row['status'] == 'rejected'): ?>
-                                    <button class="btn btn-danger btn-sm px-3 border disabled" disabled title="Bài đăng này đã bị Admin từ chối">
-                                        <i class="bi bi-x-circle"></i> Từ chối
-                                    </button>
-
-                                <?php else: ?>
-                                    <?php if ($is_full): ?>
-                                        <button class="btn btn-secondary btn-sm px-3 border disabled-cursor" title="Lớp đã đủ học viên, không thể mở lại">
-                                            <i class="bi bi-dash-circle"></i> Đầy
-                                        </button>
-                                    <?php else: ?>
-                                        <a href="update_status.php?id=<?= $row['id'] ?>&action=open" 
-                                           class="btn btn-success btn-sm px-3 border" 
-                                           title="Mở lại lớp">
-                                            <i class="bi bi-unlock-fill"></i>
-                                        </a>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-
-                                <a href="delete_class.php?id=<?= $row['id'] ?>" 
-                                   class="btn btn-light btn-sm px-3 text-danger border hover-danger" 
-                                   onclick="return confirm('CẢNH BÁO: Bạn có chắc muốn XÓA VĨNH VIỄN lớp này không? Hành động này không thể hoàn tác.')" title="Xóa vĩnh viễn">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+    <div class="tab-content" id="classTabsContent">
+        
+        <div class="tab-pane fade show active" id="upcoming" role="tabpanel">
+            <?php if(count($list_upcoming) > 0): ?>
+                <div class="row">
+                    <?php foreach($list_upcoming as $class) renderClassCard($class, 'upcoming'); ?>
                 </div>
-            </div>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <div class="text-center py-5">
-            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486754.png" width="100" class="opacity-25 mb-3" alt="Empty">
-            <p class="text-muted">Bạn chưa đăng lớp học nào.</p>
-            <a href="new_class.php" class="btn btn-brand mt-2">Đăng lớp ngay</a>
+            <?php else: ?>
+                <div class="empty-state">
+                    <i class="bi bi-megaphone fs-1 mb-2"></i>
+                    <p>Không có lớp nào đang tuyển sinh.</p>
+                </div>
+            <?php endif; ?>
         </div>
-    <?php endif; ?>
+
+        <div class="tab-pane fade" id="ongoing" role="tabpanel">
+            <?php if(count($list_ongoing) > 0): ?>
+                <div class="row">
+                    <?php foreach($list_ongoing as $class) renderClassCard($class, 'ongoing'); ?>
+                </div>
+            <?php else: ?>
+                <div class="empty-state">
+                    <i class="bi bi-mortarboard fs-1 mb-2"></i>
+                    <p>Chưa có lớp nào đang diễn ra.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="tab-pane fade" id="hidden" role="tabpanel">
+            <?php if(count($list_hidden) > 0): ?>
+                <div class="row">
+                    <?php foreach($list_hidden as $class) renderClassCard($class, 'hidden'); ?>
+                </div>
+            <?php else: ?>
+                <div class="empty-state">
+                    <i class="bi bi-eye-slash fs-1 mb-2"></i>
+                    <p>Không có lớp nháp/ẩn nào.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="tab-pane fade" id="pending" role="tabpanel">
+            <?php if(count($list_pending) > 0 || count($list_rejected) > 0): ?>
+                <div class="row">
+                    <?php 
+                        foreach($list_pending as $class) renderClassCard($class, 'pending'); 
+                        foreach($list_rejected as $class) renderClassCard($class, 'rejected'); 
+                    ?>
+                </div>
+            <?php else: ?>
+                <div class="empty-state">
+                    <i class="bi bi-hourglass-split fs-1 mb-2"></i>
+                    <p>Không có lớp nào đang chờ duyệt.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+
+    </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
