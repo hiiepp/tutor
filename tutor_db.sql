@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th1 15, 2026 lúc 08:39 PM
+-- Thời gian đã tạo: Th1 17, 2026 lúc 09:53 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -178,7 +178,7 @@ INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `role`, `avatar`, `
 (9, 'a', 'a@gmail.com', '$2y$10$1kJpyarTH6jeny50w6j8FevWCjslReHpbgfVKvrZituocwprzCj9q', 'student', NULL, NULL, 'Nam', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-07 08:16:35'),
 (10, 'ad', 'ad@gmail.com', '$2y$10$1OhJVY8X0pBqId86BlJmIOQNc8B7.YibU63yP0FsVW8qu4JGUrMX2', 'tutor', NULL, NULL, 'Nam', 'adàda', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-14 07:13:22'),
 (11, 'abc', 'z@gmail.com', '$2y$10$3.8QH143KzmP3xhbLgNDZOFbb50CZ87m1tULOQOKJ6NjCeckv4yMO', 'tutor', 'user_11_1768376282.png', '2006-02-09', 'Nam', '0323456789', '', '', '', '', '', NULL, NULL, '2026-01-14 07:21:40'),
-(12, 'trâm khùng', 't@gmail.com', '$2y$10$Sl0lln3gzVjOpDDEjHvMsOPsazarK9YUbaKCZ4LxhwB1t2J4CEMzm', 'tutor', NULL, NULL, 'Nam', '0346584598', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-15 17:56:13');
+(12, 'trâm khùng', 't@gmail.com', '$2y$10$Sl0lln3gzVjOpDDEjHvMsOPsazarK9YUbaKCZ4LxhwB1t2J4CEMzm', 'tutor', NULL, NULL, 'Nam', '0346584598', '', '', '', '', '', NULL, NULL, '2026-01-15 17:56:13');
 
 --
 -- Chỉ mục cho các bảng đã đổ

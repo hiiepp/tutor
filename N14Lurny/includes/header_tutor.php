@@ -29,7 +29,7 @@ if (isset($_SESSION['user_id'])) {
 
 <nav class="navbar navbar-expand-lg bg-white border-bottom py-2 fixed-top-nav">
   <div class="container">
-    <a class="navbar-brand fw-bold text-success d-flex align-items-center" href="<?= $base_url ?>/index.php">
+    <a class="navbar-brand fw-bold text-success d-flex align-items-center" href="<?= $base_url ?>/tutor/class_management.php">
         <i class="bi bi-mortarboard-fill me-2 fs-3"></i> N14Lurny
     </a>
     
@@ -39,7 +39,7 @@ if (isset($_SESSION['user_id'])) {
 
     <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-            <li class="nav-item"><a class="nav-link" href="<?= $base_url ?>/index.php">Trang chủ</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= $base_url ?>/tutor/class_management.php">Trang chủ</a></li>
         </ul>
 
         <div class="d-flex align-items-center">
@@ -86,8 +86,32 @@ if (isset($_SESSION['user_id'])) {
                         </div>
                         <span class="fw-bold d-none d-sm-block"><?= htmlspecialchars($_SESSION['fullname'] ?? 'User') ?></span>
                     </a>
+                    
                     <ul class="dropdown-menu dropdown-menu-end p-0 shadow border-0">
-                        <li><a class="dropdown-item py-2" href="<?= $base_url ?>/auth/logout.php">Đăng xuất</a></li>
+                        <li class="p-3 border-bottom bg-light rounded-top">
+                            <div class="fw-bold text-dark"><?= htmlspecialchars($_SESSION['fullname'] ?? 'Gia sư') ?></div>
+                            <div class="small text-muted">Gia sư</div>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item py-2 mt-1" href="<?= $base_url ?>/tutor/view_detail.php">
+                                <i class="bi bi-person-circle me-2 text-primary"></i> Hồ sơ cá nhân
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a class="dropdown-item py-2" href="#">
+                                <i class="bi bi-key-fill me-2 text-warning"></i> Đổi mật khẩu
+                            </a>
+                        </li>
+
+                        <li><hr class="dropdown-divider m-0"></li>
+                        
+                        <li>
+                            <a class="dropdown-item py-2 text-danger" href="<?= $base_url ?>/auth/logout.php">
+                                <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -101,6 +125,5 @@ if (isset($_SESSION['user_id'])) {
 
 <script>
 document.getElementById('notifDropdown').addEventListener('show.bs.dropdown', function () {
-    // Có thể thêm AJAX ở đây để update is_read = 1 trong database khi mở menu
 });
 </script>

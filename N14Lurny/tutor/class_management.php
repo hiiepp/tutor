@@ -36,6 +36,18 @@ while ($row = $result->fetch_assoc()) {
     $has_students = ($row['accepted_count'] > 0);
     $is_started = (!empty($row['start_date']) && $row['start_date'] <= $today);
 
+    // --- TỰ ĐỘNG KHÓA LỚP QUÁ HẠN KHÔNG CÓ HỌC VIÊN ---
+    // Nếu: Đang mở (active) VÀ Đã đến ngày (is_started) VÀ Không có học viên (!has_students)
+    if ($row['status'] == 'active' && $is_started && !$has_students) {
+        // 1. Cập nhật Database thành 'closed'
+        $update_id = $row['id'];
+        $conn->query("UPDATE classes SET status = 'closed' WHERE id = $update_id");
+        
+        // 2. Cập nhật biến $row để xếp loại đúng vào tab Đang ẩn ngay bây giờ
+        $row['status'] = 'closed';
+    }
+    // ----------------------------------------------------
+
     if ($row['status'] == 'pending') {
         $list_pending[] = $row;
     } 
@@ -44,9 +56,11 @@ while ($row = $result->fetch_assoc()) {
     }
     elseif ($row['status'] == 'hidden' || $row['status'] == 'closed') {
         if ($has_students) {
+            // Nếu đã có học viên thì vẫn hiện ở tab Dạy
             if ($is_started) $list_ongoing[] = $row;
             else $list_upcoming[] = $row;
         } else {
+            // Nếu không có học viên -> Vào tab Đang ẩn
             $list_hidden[] = $row;
         }
     } 
@@ -72,7 +86,7 @@ function renderClassCard($row, $type) {
     $db_status = $row['status'];
     $has_students = ($current > 0);
 
-    // --- LOGIC XÓA MỚI: Chỉ cần có học viên là khóa nút xóa ---
+    // Logic Xóa: Khóa nút xóa nếu có học viên
     $can_delete = !$has_students;
 
     $status_label = '';
@@ -85,7 +99,9 @@ function renderClassCard($row, $type) {
         $status_label = '<span class="badge bg-danger">🚫 Bị từ chối</span>';
         $opacity = 'opacity-75';
     } elseif ($type == 'hidden') {
-        $status_label = '<span class="badge bg-secondary"><i class="bi bi-eye-slash-fill"></i> Đang ẩn (Trống)</span>';
+        // Thêm label giải thích lý do ẩn
+        $reason = ($db_status == 'closed' && !$has_students) ? "(Quá hạn tuyển)" : "(Chưa có HV)";
+        $status_label = '<span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> Đã khóa ' . $reason . '</span>';
         $opacity = 'opacity-75 bg-light';
     } else {
         if ($db_status == 'hidden' || $db_status == 'closed') {
@@ -144,7 +160,7 @@ function renderClassCard($row, $type) {
                             </a>
                             
                             <?php if ($is_started || $is_full || $type == 'rejected'): ?>
-                                <button class="btn btn-light btn-sm px-3 border disabled" title="Không thể sửa khi lớp đã bắt đầu hoặc đủ học viên">
+                                <button class="btn btn-light btn-sm px-3 border disabled" title="Không thể sửa">
                                     <i class="bi bi-pencil text-muted"></i>
                                 </button>
                             <?php else: ?>
@@ -156,7 +172,7 @@ function renderClassCard($row, $type) {
                             <?php if ($db_status == 'active'): ?>
                                 <a href="update_status.php?id=<?= $row['id'] ?>&action=close" 
                                    class="btn btn-warning btn-sm px-3 text-dark border" 
-                                   onclick="return confirm('Khóa lớp này? Học viên mới sẽ không thấy nữa.')" 
+                                   onclick="return confirm('Khóa lớp này?')" 
                                    title="Khóa lớp">
                                     <i class="bi bi-lock-fill"></i>
                                 </a>
