@@ -4,9 +4,34 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $base_url = '/N14Lurny'; 
+
+// --- LOGIC LẤY THÔNG BÁO CHO HỌC SINH ---
+$notif_count = 0;
+$notifications = [];
+
+if (isset($_SESSION['user_id'])) {
+    // Đảm bảo đường dẫn tới config/db.php đúng
+    require_once dirname(__FILE__) . '/../config/db.php'; 
+    $uid = $_SESSION['user_id'];
+
+    // Đếm số thông báo chưa đọc
+    $count_sql = "SELECT COUNT(*) as total FROM notifications WHERE user_id = $uid AND is_read = 0";
+    $count_res = $conn->query($count_sql);
+    if($count_res) $notif_count = $count_res->fetch_assoc()['total'];
+
+    // Lấy 5 thông báo mới nhất
+    $list_sql = "SELECT * FROM notifications WHERE user_id = $uid ORDER BY created_at DESC LIMIT 5";
+    $list_res = $conn->query($list_sql);
+    if($list_res) {
+        // --- SỬA LỖI Ở ĐÂY: Đổi $row thành $notif_row để không trùng lặp ---
+        while($notif_row = $list_res->fetch_assoc()) {
+            $notifications[] = $notif_row;
+        }
+    }
+}
 ?>
 
-<nav class="navbar navbar-expand-lg bg-white border-bottom py-2 fixed-top-nav">
+<nav class="navbar navbar-expand-lg bg-white border-bottom py-2 fixed-top-nav" style="position: relative; z-index: 1050;">
   <div class="container">
     <a class="navbar-brand fw-bold text-success d-flex align-items-center" href="<?= $base_url ?>/index.php">
         <i class="bi bi-mortarboard-fill me-2 fs-3"></i> N14Lurny
@@ -32,25 +57,80 @@ $base_url = '/N14Lurny';
                 $fullname = isset($_SESSION['fullname']) ? $_SESSION['fullname'] : 'Học viên';
                 $email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
                 $firstLetter = mb_substr($fullname, 0, 1, 'UTF-8');
-                $role = $_SESSION['role'] ?? 'student';
+                
+                // Lấy Avatar người dùng
+                $user_avatar = '';
+                $u_id = $_SESSION['user_id'];
+                $u_res = $conn->query("SELECT avatar FROM users WHERE id=$u_id");
+                if($u_res && $u_row = $u_res->fetch_assoc()) {
+                    $user_avatar = $u_row['avatar'];
+                }
             ?>
 
-            <a href="#" class="text-secondary me-4 position-relative">
-                <i class="bi bi-bell-fill fs-5"></i>
-            </a>
+            <div class="dropdown me-4">
+                <a href="#" class="text-secondary position-relative text-decoration-none" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-bell-fill fs-5"></i>
+                    <?php if($notif_count > 0): ?>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.6rem;">
+                            <?= $notif_count ?>
+                        </span>
+                    <?php endif; ?>
+                </a>
+                
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="notifDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                    <li class="dropdown-header fw-bold border-bottom d-flex justify-content-between align-items-center">
+                        <span>Thông báo</span>
+                    </li>
+                    
+                    <?php if (count($notifications) > 0): ?>
+                        <?php foreach($notifications as $notif): ?>
+                            <li>
+                                <a class="dropdown-item py-2 border-bottom <?= $notif['is_read'] == 0 ? 'bg-light' : '' ?>" href="<?= $base_url ?>/<?= $notif['link'] ?>">
+                                    <div class="d-flex align-items-start">
+                                        <?php if(mb_stripos($notif['title'], 'thành công') !== false): ?>
+                                            <i class="bi bi-check-circle-fill text-success mt-1 me-2"></i>
+                                        <?php elseif(mb_stripos($notif['title'], 'từ chối') !== false): ?>
+                                            <i class="bi bi-x-circle-fill text-danger mt-1 me-2"></i>
+                                        <?php else: ?>
+                                            <i class="bi bi-info-circle-fill text-primary mt-1 me-2"></i>
+                                        <?php endif; ?>
+                                        
+                                        <div>
+                                            <strong class="d-block text-dark" style="font-size: 0.9rem;"><?= htmlspecialchars($notif['title']) ?></strong>
+                                            <small class="text-muted d-block text-wrap" style="font-size: 0.8rem; line-height: 1.3;"><?= htmlspecialchars($notif['message']) ?></small>
+                                            <small class="text-secondary" style="font-size: 0.7rem;"><?= date('H:i d/m/Y', strtotime($notif['created_at'])) ?></small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <li class="p-4 text-center text-muted small">
+                            <i class="bi bi-bell-slash fs-4 d-block mb-2"></i>
+                            Chưa có thông báo nào
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </div>
 
             <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" id="studentDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-2 fw-bold" style="width: 35px; height: 35px;">
-                        <?php echo $firstLetter; ?>
-                    </div>
-                    <span class="fw-bold d-none d-sm-block"><?php echo htmlspecialchars($fullname); ?></span>
+                    
+                    <?php if (!empty($user_avatar) && file_exists(dirname(__FILE__) . '/../assets/uploads/avatars/' . $user_avatar)): ?>
+                        <img src="<?= $base_url ?>/assets/uploads/avatars/<?= $user_avatar ?>" class="rounded-circle me-2 object-fit-cover shadow-sm border" style="width: 35px; height: 35px;">
+                    <?php else: ?>
+                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-2 fw-bold" style="width: 35px; height: 35px;">
+                            <?= $firstLetter ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <span class="fw-bold d-none d-sm-block"><?= htmlspecialchars($fullname); ?></span>
                 </a>
 
                 <ul class="dropdown-menu dropdown-menu-end p-0 shadow border-0" aria-labelledby="studentDropdown">
                     <li class="p-3 border-bottom bg-light rounded-top">
-                        <div class="fw-bold text-dark"><?php echo htmlspecialchars($fullname); ?></div>
-                        <div class="small text-muted"><?php echo htmlspecialchars($email); ?></div>
+                        <div class="fw-bold text-dark"><?= htmlspecialchars($fullname); ?></div>
+                        <div class="small text-muted"><?= htmlspecialchars($email); ?></div>
                         <div class="badge bg-success mt-2">HỌC VIÊN</div>
                     </li>
                     

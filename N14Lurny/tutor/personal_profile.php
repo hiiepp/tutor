@@ -13,12 +13,25 @@ $user_id = $_SESSION['user_id'];
 $message = '';
 $msg_type = '';
 
+// --- XỬ LÝ XÓA ẢNH MINH CHỨNG (Nếu có yêu cầu xóa) ---
+if (isset($_GET['del_proof'])) {
+    $proof_id = intval($_GET['del_proof']);
+    // Kiểm tra ảnh đó có phải của user này không để tránh xóa bậy
+    $check = $conn->query("SELECT image_path FROM tutor_proofs WHERE id=$proof_id AND user_id=$user_id");
+    if ($row = $check->fetch_assoc()) {
+        $file_path = "../assets/uploads/proofs/" . $row['image_path'];
+        if (file_exists($file_path)) unlink($file_path); // Xóa file vật lý
+        $conn->query("DELETE FROM tutor_proofs WHERE id=$proof_id"); // Xóa DB
+        header("Location: personal_profile.php"); // Load lại trang
+        exit();
+    }
+}
+
 // 2. XỬ LÝ CẬP NHẬT THÔNG TIN
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $full_name = trim($_POST['hoten']);
     $phone = trim($_POST['sdt']);
     $address = trim($_POST['diachi']);
-    // --- MỚI THÊM: NGÀY SINH ---
     $dob = !empty($_POST['dob']) ? $_POST['dob'] : null;
     
     $degree = isset($_POST['trinhdo']) ? trim($_POST['trinhdo']) : null;
@@ -26,33 +39,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $experience = isset($_POST['kinhnghiem']) ? trim($_POST['kinhnghiem']) : null;
     $bio = isset($_POST['gioithieu']) ? trim($_POST['gioithieu']) : null;
 
-    // --- XỬ LÝ UPLOAD ẢNH (Giữ nguyên) ---
+    // --- XỬ LÝ UPLOAD AVATAR (Giữ nguyên) ---
     $avatar_sql = ""; 
     $upload_ok = true;
 
     if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] == 0) {
         $target_dir = "../assets/uploads/avatars/";
         if (!file_exists($target_dir)) { mkdir($target_dir, 0777, true); }
-
         $file_ext = strtolower(pathinfo($_FILES["avatar"]["name"], PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+        $new_name = "user_" . $user_id . "_" . time() . "." . $file_ext;
+        if (move_uploaded_file($_FILES["avatar"]["tmp_name"], $target_dir . $new_name)) {
+            $avatar_sql = ", avatar = '$new_name'";
+        }
+    }
 
-        if (!in_array($file_ext, $allowed)) {
-            $message = "Chỉ chấp nhận file ảnh (JPG, PNG, GIF).";
-            $msg_type = "danger";
-            $upload_ok = false;
-        } elseif ($_FILES["avatar"]["size"] > 2 * 1024 * 1024) {
-            $message = "Ảnh quá lớn (Tối đa 2MB).";
-            $msg_type = "danger";
-            $upload_ok = false;
-        } else {
-            $new_name = "user_" . $user_id . "_" . time() . "." . $file_ext;
-            if (move_uploaded_file($_FILES["avatar"]["tmp_name"], $target_dir . $new_name)) {
-                $avatar_sql = ", avatar = '$new_name'";
-            } else {
-                $message = "Lỗi khi lưu ảnh lên server.";
-                $msg_type = "danger";
-                $upload_ok = false;
+    // --- MỚI: XỬ LÝ UPLOAD ẢNH MINH CHỨNG (MULTIPLE) ---
+    if (isset($_FILES['proofs']) && count($_FILES['proofs']['name']) > 0) {
+        $proof_dir = "../assets/uploads/proofs/";
+        if (!file_exists($proof_dir)) { mkdir($proof_dir, 0777, true); }
+        
+        $total_files = count($_FILES['proofs']['name']);
+        
+        for ($i = 0; $i < $total_files; $i++) {
+            if ($_FILES['proofs']['error'][$i] == 0) {
+                $p_ext = strtolower(pathinfo($_FILES['proofs']['name'][$i], PATHINFO_EXTENSION));
+                // Đặt tên file unique
+                $p_name = "proof_" . $user_id . "_" . time() . "_" . $i . "." . $p_ext;
+                
+                if (move_uploaded_file($_FILES['proofs']['tmp_name'][$i], $proof_dir . $p_name)) {
+                    // Chèn vào bảng tutor_proofs
+                    $stmt_proof = $conn->prepare("INSERT INTO tutor_proofs (user_id, image_path) VALUES (?, ?)");
+                    $stmt_proof->bind_param("is", $user_id, $p_name);
+                    $stmt_proof->execute();
+                }
             }
         }
     }
@@ -61,15 +80,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message = "Họ tên không được để trống!";
         $msg_type = "danger";
     } elseif ($upload_ok) {
-        // Cập nhật Database (Thêm cột dob)
         $sql = "UPDATE users SET full_name=?, phone=?, address=?, dob=?, degree=?, major=?, experience=?, bio=? $avatar_sql WHERE id=?";
         $stmt = $conn->prepare($sql);
-        // Lưu ý chuỗi định dạng: ssssssssi (Thêm 1 chữ s cho dob)
         $stmt->bind_param("ssssssssi", $full_name, $phone, $address, $dob, $degree, $major, $experience, $bio, $user_id);
         
         if ($stmt->execute()) {
             $_SESSION['fullname'] = $full_name;
-            echo "<script>alert('Cập nhật thành công!'); window.location.href='view_detail.php';</script>";
+            echo "<script>alert('Cập nhật hồ sơ thành công!'); window.location.href='view_detail.php';</script>";
             exit();
         } else {
             $message = "Lỗi hệ thống: " . $conn->error;
@@ -85,6 +102,9 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 
+// Lấy danh sách ảnh minh chứng
+$proofs_res = $conn->query("SELECT * FROM tutor_proofs WHERE user_id = $user_id ORDER BY id DESC");
+
 $avatar_url = (!empty($user['avatar']) && file_exists("../assets/uploads/avatars/" . $user['avatar'])) 
               ? "../assets/uploads/avatars/" . $user['avatar'] 
               : "";
@@ -99,6 +119,12 @@ $initials = mb_strtoupper(mb_substr($user['full_name'], 0, 1, "UTF-8"));
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/tutor.css">
+    <style>
+        .proof-item { position: relative; width: 100px; height: 100px; border-radius: 8px; overflow: hidden; border: 1px solid #ddd; }
+        .proof-item img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-del-proof { position: absolute; top: 2px; right: 2px; background: rgba(255,255,255,0.9); color: red; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; text-decoration: none; }
+        .btn-del-proof:hover { background: red; color: white; }
+    </style>
 </head>
 <body class="bg-light">
 
@@ -120,11 +146,6 @@ $initials = mb_strtoupper(mb_substr($user['full_name'], 0, 1, "UTF-8"));
                     <a href="change_password.php" class="list-group-item list-group-item-action border-0 rounded mb-1">
                         <i class="bi bi-shield-lock me-2"></i> Đổi mật khẩu
                     </a>
-                    <?php if ($user['role'] == 'tutor'): ?>
-                    <a href="#" class="list-group-item list-group-item-action border-0 rounded">
-                        <i class="bi bi-patch-check me-2"></i> Xác minh danh tính
-                    </a>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -141,7 +162,6 @@ $initials = mb_strtoupper(mb_substr($user['full_name'], 0, 1, "UTF-8"));
                 
                 <div class="card p-4 mb-4 border-0 shadow-sm">
                     <h6 class="fw-bold mb-3 pb-2 border-bottom text-primary">Thông tin cơ bản</h6>
-
                     <div class="d-flex align-items-center mb-4">
                         <div class="me-3 position-relative">
                             <?php if($avatar_url): ?>
@@ -153,7 +173,6 @@ $initials = mb_strtoupper(mb_substr($user['full_name'], 0, 1, "UTF-8"));
                                 <img id="preview" class="rounded-circle object-fit-cover border d-none" style="width: 80px; height: 80px;">
                             <?php endif; ?>
                         </div>
-
                         <div>
                             <label for="avatarInput" class="btn btn-sm btn-outline-primary mb-1">
                                 <i class="bi bi-upload"></i> Tải ảnh mới
@@ -164,28 +183,11 @@ $initials = mb_strtoupper(mb_substr($user['full_name'], 0, 1, "UTF-8"));
                     </div>
 
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
-                            <input type="text" name="hoten" class="form-control" value="<?= htmlspecialchars($user['full_name']) ?>" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control bg-light" value="<?= htmlspecialchars($user['email']) ?>" disabled>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Số điện thoại</label>
-                            <input type="text" name="sdt" class="form-control" value="<?= htmlspecialchars($user['phone']) ?>">
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label class="form-label">Ngày sinh</label>
-                            <input type="date" name="dob" class="form-control" value="<?= htmlspecialchars($user['dob'] ?? '') ?>">
-                        </div>
-
-                        <div class="col-12">
-                            <label class="form-label">Địa chỉ</label>
-                            <input type="text" name="diachi" class="form-control" value="<?= htmlspecialchars($user['address'] ?? '') ?>">
-                        </div>
+                        <div class="col-md-6"><label class="form-label">Họ và tên <span class="text-danger">*</span></label><input type="text" name="hoten" class="form-control" value="<?= htmlspecialchars($user['full_name']) ?>" required></div>
+                        <div class="col-md-6"><label class="form-label">Email</label><input type="email" class="form-control bg-light" value="<?= htmlspecialchars($user['email']) ?>" disabled></div>
+                        <div class="col-md-6"><label class="form-label">Số điện thoại</label><input type="text" name="sdt" class="form-control" value="<?= htmlspecialchars($user['phone']) ?>"></div>
+                        <div class="col-md-6"><label class="form-label">Ngày sinh</label><input type="date" name="dob" class="form-control" value="<?= htmlspecialchars($user['dob'] ?? '') ?>"></div>
+                        <div class="col-12"><label class="form-label">Địa chỉ</label><input type="text" name="diachi" class="form-control" value="<?= htmlspecialchars($user['address'] ?? '') ?>"></div>
                     </div>
                 </div>
 
@@ -214,6 +216,31 @@ $initials = mb_strtoupper(mb_substr($user['full_name'], 0, 1, "UTF-8"));
                             <label class="form-label">Kinh nghiệm</label>
                             <input type="text" name="kinhnghiem" class="form-control" value="<?= htmlspecialchars($user['experience'] ?? '') ?>">
                         </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Ảnh bằng cấp / Chứng chỉ / Hoạt động dạy</label>
+                            <div class="border rounded p-3 bg-white">
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <?php if($proofs_res->num_rows > 0): ?>
+                                        <?php while($img = $proofs_res->fetch_assoc()): ?>
+                                            <div class="proof-item shadow-sm">
+                                                <img src="../assets/uploads/proofs/<?= $img['image_path'] ?>" alt="Proof">
+                                                <a href="?del_proof=<?= $img['id'] ?>" class="btn-del-proof" onclick="return confirm('Xóa ảnh này?')"><i class="bi bi-x"></i></a>
+                                            </div>
+                                        <?php endwhile; ?>
+                                    <?php else: ?>
+                                        <p class="text-muted small mb-0 fst-italic">Chưa có ảnh minh chứng nào.</p>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <label class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-images me-1"></i> Chọn ảnh thêm (có thể chọn nhiều)
+                                    <input type="file" name="proofs[]" hidden multiple accept="image/*" onchange="showFileCount(this)">
+                                </label>
+                                <span id="file-count" class="ms-2 small text-muted"></span>
+                            </div>
+                        </div>
+
                         <div class="col-12">
                             <label class="form-label">Giới thiệu bản thân</label>
                             <textarea name="gioithieu" class="form-control" rows="5"><?= htmlspecialchars($user['bio'] ?? '') ?></textarea>
@@ -245,6 +272,11 @@ function previewImage(input) {
         }
         reader.readAsDataURL(input.files[0]);
     }
+}
+
+function showFileCount(input) {
+    const count = input.files.length;
+    document.getElementById('file-count').innerText = count > 0 ? `Đã chọn ${count} ảnh` : '';
 }
 </script>
 </body>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th1 17, 2026 lúc 09:53 AM
+-- Thời gian đã tạo: Th1 20, 2026 lúc 11:18 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -64,7 +64,9 @@ INSERT INTO `classes` (`id`, `tutor_id`, `title`, `subject`, `grade`, `price`, `
 (14, 12, 'xZSD', 'Toán', 'Lớp 1', '300000 VND/Giờ', 'Mô tả: sdfcvW\nSố học viên: 1\nLịch học: ÁcdSAC\nYêu cầu: ', 'Online', 'XVASDVF', 'hidden', 1, '2026-01-16', '2026-01-23', '2026-01-15 18:23:54'),
 (15, 12, 'xxx', 'Toán', 'Lớp 1', '390000 VND/Giờ', 'Mô tả: xxx\nSố học viên: 10\nLịch học: xxx\nYêu cầu: ', 'Offline', 'xx, Phường Trung Mỹ Tây, Quận 12, TP. Hồ Chí Minh', 'hidden', 1, '2026-01-24', '2026-02-07', '2026-01-15 18:49:11'),
 (16, 12, 'ấ', 'Toán', 'Lớp 1', '300000 VND/Giờ', 'Mô tả: á\nSố học viên: 5\nLịch học: qàewq\nYêu cầu: ', 'Offline', 'qadfqewa, Phường 11, Quận Phú Nhuận, TP. Hồ Chí Minh', 'active', 1, '2026-01-24', '2026-02-07', '2026-01-15 19:04:57'),
-(17, 12, 'ads', 'Toán', 'Lớp 1', '4000000 VND/Giờ', 'Mô tả: \nLịch học: ZX C\nYêu cầu: ', 'Offline', 'zx c, Phường 4, Quận 8, TP. Hồ Chí Minh', 'active', 6, '2026-01-24', '2026-02-08', '2026-01-15 19:14:50');
+(17, 12, 'ads', 'Toán', 'Lớp 1', '4000000 VND/Giờ', 'Mô tả: \nLịch học: ZX C\nYêu cầu: ', 'Offline', 'zx c, Phường 4, Quận 8, TP. Hồ Chí Minh', 'active', 6, '2026-01-24', '2026-02-08', '2026-01-15 19:14:50'),
+(18, 13, 'âcs', 'Toán', 'Lớp 1', '3000000 VND/Giờ', 'Mô tả: dasa\nLịch học: áda\nYêu cầu: ', 'Offline', 'cfasdcasecd, Phường Linh Tây, Quận Thủ Đức, TP. Hồ Chí Minh', 'closed', 1, '2026-01-20', '2026-01-30', '2026-01-20 10:14:00'),
+(19, 13, 'WQEF', 'Toán', 'Lớp 1', '3000000 VND/Giờ', 'Mô tả: \nLịch học: ằGWEARF\nYêu cầu: ', 'Offline', 'qwfawe, Phường 22, Quận Bình Thạnh, TP. Hồ Chí Minh', 'hidden', 1, '2026-01-29', '2026-02-06', '2026-01-20 10:15:34');
 
 -- --------------------------------------------------------
 
@@ -91,7 +93,8 @@ INSERT INTO `class_registrations` (`id`, `class_id`, `student_id`, `status`, `me
 (2, 12, 9, 'pending', 'âsá', NULL, '2026-01-14 09:17:36'),
 (4, 14, 9, 'accepted', 'ad', NULL, '2026-01-15 18:36:25'),
 (5, 15, 7, 'accepted', 'ccc', NULL, '2026-01-15 19:03:40'),
-(6, 17, 9, 'accepted', 'szvdfc', NULL, '2026-01-15 19:15:58');
+(6, 17, 9, 'accepted', 'szvdfc', NULL, '2026-01-15 19:15:58'),
+(7, 19, 14, 'accepted', 'qwdw', NULL, '2026-01-20 10:16:45');
 
 -- --------------------------------------------------------
 
@@ -123,6 +126,13 @@ CREATE TABLE `notifications` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `notifications`
+--
+
+INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `is_read`, `link`, `created_at`) VALUES
+(1, 14, 'Đăng ký thành công! ✅', 'Chúc mừng! Gia sư đã duyệt bạn vào lớp: WQEF. Xem chi tiết để lấy SĐT liên hệ.', 0, 'class-detail.php?id=19', '2026-01-20 10:17:19');
+
 -- --------------------------------------------------------
 
 --
@@ -137,6 +147,28 @@ CREATE TABLE `reports` (
   `status` enum('pending','processed') NOT NULL DEFAULT 'pending' COMMENT 'Trạng thái xử lý',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `tutor_proofs`
+--
+
+CREATE TABLE `tutor_proofs` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `image_path` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `tutor_proofs`
+--
+
+INSERT INTO `tutor_proofs` (`id`, `user_id`, `image_path`, `created_at`) VALUES
+(1, 12, 'proof_12_1768895349_0.jpg', '2026-01-20 07:49:09'),
+(2, 12, 'proof_12_1768895349_1.jpg', '2026-01-20 07:49:09'),
+(3, 12, 'proof_12_1768895349_2.jpg', '2026-01-20 07:49:09');
 
 -- --------------------------------------------------------
 
@@ -175,10 +207,12 @@ INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `role`, `avatar`, `
 (4, 'abc', 'student1@gmail.com', '$2y$10$YourHashedPasswordHere', 'student', NULL, NULL, 'Nam', '0933333333', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12'),
 (7, 'abc', 'abc@gmail.com', '$2y$10$Hch33NYyxBQ4s5HKfooy3.W29yCMuPanBww/7TxrClHJD7wv7UCl2', 'student', NULL, NULL, 'Nam', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-31 15:10:09'),
 (8, 'hhh', 'h@gmail.com', '$2y$10$2nDuIl3VMzdW42hxToBXvOUsGNzgtMcF5Hzv9/yNP0XstHmDzdbU6', 'tutor', NULL, NULL, 'Nam', '0134567865', 'đẹp trai', '', 'Sinh viên', '2 năm', '', NULL, NULL, '2026-01-07 08:15:37'),
-(9, 'a', 'a@gmail.com', '$2y$10$1kJpyarTH6jeny50w6j8FevWCjslReHpbgfVKvrZituocwprzCj9q', 'student', NULL, NULL, 'Nam', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-07 08:16:35'),
+(9, 'a', 'a@gmail.com', '$2y$10$1kJpyarTH6jeny50w6j8FevWCjslReHpbgfVKvrZituocwprzCj9q', 'student', 'stu_9_1768897966.jpg', '2018-06-14', 'Nam', '0123456789', NULL, NULL, NULL, NULL, '', '', '', '2026-01-07 08:16:35'),
 (10, 'ad', 'ad@gmail.com', '$2y$10$1OhJVY8X0pBqId86BlJmIOQNc8B7.YibU63yP0FsVW8qu4JGUrMX2', 'tutor', NULL, NULL, 'Nam', 'adàda', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-14 07:13:22'),
 (11, 'abc', 'z@gmail.com', '$2y$10$3.8QH143KzmP3xhbLgNDZOFbb50CZ87m1tULOQOKJ6NjCeckv4yMO', 'tutor', 'user_11_1768376282.png', '2006-02-09', 'Nam', '0323456789', '', '', '', '', '', NULL, NULL, '2026-01-14 07:21:40'),
-(12, 'trâm khùng', 't@gmail.com', '$2y$10$Sl0lln3gzVjOpDDEjHvMsOPsazarK9YUbaKCZ4LxhwB1t2J4CEMzm', 'tutor', NULL, NULL, 'Nam', '0346584598', '', '', '', '', '', NULL, NULL, '2026-01-15 17:56:13');
+(12, 'trâm khùng', 't@gmail.com', '$2y$10$Sl0lln3gzVjOpDDEjHvMsOPsazarK9YUbaKCZ4LxhwB1t2J4CEMzm', 'tutor', NULL, NULL, 'Nam', '0346584598', '', '', '', '', '', NULL, NULL, '2026-01-15 17:56:13'),
+(13, 'ádf', 'q@gmail.com', '$2y$10$fdJDXrvOoz5SMeWxq/DUHeNR0rqullwVstPMCKQuwknkgZ8KKCwP2', 'tutor', NULL, NULL, 'Nam', '0913434524', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-20 10:12:47'),
+(14, '1', 'w@gmail.com', '$2y$10$jDmA7PNW0qMDux92ny3bLuymiJGKPvBqdqrwggshNwO1G2mwPGnhi', 'student', NULL, NULL, 'Nam', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-20 10:16:33');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -220,6 +254,13 @@ ALTER TABLE `reports`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Chỉ mục cho bảng `tutor_proofs`
+--
+ALTER TABLE `tutor_proofs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Chỉ mục cho bảng `users`
 --
 ALTER TABLE `users`
@@ -234,13 +275,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT cho bảng `classes`
 --
 ALTER TABLE `classes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT cho bảng `class_registrations`
 --
 ALTER TABLE `class_registrations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `enrollments`
@@ -252,7 +293,7 @@ ALTER TABLE `enrollments`
 -- AUTO_INCREMENT cho bảng `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `reports`
@@ -261,10 +302,16 @@ ALTER TABLE `reports`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT cho bảng `tutor_proofs`
+--
+ALTER TABLE `tutor_proofs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
@@ -289,6 +336,12 @@ ALTER TABLE `class_registrations`
 ALTER TABLE `enrollments`
   ADD CONSTRAINT `fk_enroll_class` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_enroll_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `tutor_proofs`
+--
+ALTER TABLE `tutor_proofs`
+  ADD CONSTRAINT `tutor_proofs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

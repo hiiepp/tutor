@@ -109,7 +109,7 @@ if (is_numeric($price_raw)) {
 <body class="bg-light">
 
 <div class="container py-5">
-  <a href="class_management.php" class="back-link mb-3">
+  <a href="javascript:history.back()" class="back-link mb-3">
       <i class="bi bi-arrow-left"></i> Quay lại danh sách lớp
   </a>
 

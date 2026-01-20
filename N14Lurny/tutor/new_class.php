@@ -78,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="row justify-content-center">
         <div class="col-md-11 col-lg-10 col-xl-9">
             <div class="mb-4 d-flex align-items-center justify-content-between">
-                <a href="class_management.php" class="back-link text-decoration-none fw-bold fs-5">
+                <a href="javascript:history.back()" class="back-link text-decoration-none fw-bold fs-5">
                     <i class="bi bi-arrow-left"></i> Quay lại danh sách
                 </a>
             </div>

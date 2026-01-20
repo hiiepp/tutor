@@ -78,7 +78,6 @@ if (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row
     <title><?php echo htmlspecialchars($row['title']); ?> - Chi tiết lớp học</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="/N14Lurny/assets/css/style.css">
     <link rel="stylesheet" href="/N14LURNY/assets/css/tutor.css">
     <style>
         .register-box { background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
@@ -110,7 +109,7 @@ if (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row
 
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="find-class.php" class="back-link text-decoration-none">
+        <a href="javascript:history.back()" class="back-link text-decoration-none">
             <i class="bi bi-arrow-left"></i> Quay lại tìm lớp
         </a>
     </div>
@@ -174,15 +173,28 @@ if (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row
             <div class="card card-detail text-center">
                 <h5 class="fw-bold mb-4">Thông tin Gia sư</h5>
                 
-                <?php if ($avatar_url): ?>
-                    <img src="<?= $avatar_url ?>" class="tutor-avatar-img mb-3">
-                <?php else: ?>
-                    <div class="avatar-circle mx-auto mb-3">
-                        <?= $initials ?>
-                    </div>
-                <?php endif; ?>
+                <a href="student/tutor_profile.php?id=<?= $row['tutor_id'] ?>" class="text-decoration-none" title="Xem hồ sơ chi tiết">
+                    <?php if ($avatar_url): ?>
+                        <img src="<?= $avatar_url ?>" class="tutor-avatar-img mb-3 shadow-sm hover-scale">
+                    <?php else: ?>
+                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm hover-scale" style="width: 100px; height: 100px; font-size: 40px; font-weight: bold;">
+                            <?= $initials ?>
+                        </div>
+                    <?php endif; ?>
+                </a>
                 
-                <h6 class="fw-bold text-dark fs-5"><?= htmlspecialchars($tutorName) ?></h6>
+                <h6 class="fw-bold fs-5 mb-1">
+                    <a href="student/tutor_profile.php?id=<?= $row['tutor_id'] ?>" class="text-dark text-decoration-none hover-brand">
+                        <?= htmlspecialchars($tutorName) ?>
+                    </a>
+                </h6>
+                
+                <div class="small text-muted mb-3">
+                    <a href="student/tutor_profile.php?id=<?= $row['tutor_id'] ?>" class="text-secondary text-decoration-none">
+                        <i class="bi bi-eye"></i> Xem hồ sơ đầy đủ
+                    </a>
+                </div>
+
                 <div class="text-warning mb-3">
                     <i class="bi bi-star-fill"></i>
                     <i class="bi bi-star-fill"></i>

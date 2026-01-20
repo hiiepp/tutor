@@ -74,32 +74,7 @@
     </div>
   </div>
 </section>
-<section class="why">
-  <div class="container text-center">
-    <h3>Tại sao chọn N14Lurny?</h3>
-    <p class="text-muted mb-4">
-      Chúng tôi cung cấp nền tảng kết nối hiệu quả và an toàn
-    </p>
 
-    <div class="row">
-      <div class="col-md-4 why-item">
-        <div class="icon bg-success">👨‍🏫</div>
-        <h6>Gia sư được kiểm chứng</h6>
-        <p>Tất cả gia sư đều được xác minh</p>
-      </div>
-      <div class="col-md-4 why-item">
-        <div class="icon bg-info">🤝</div>
-        <h6>Thanh toán trực tiếp</h6>
-        <p>Không trung gian, không phát sinh</p>
-      </div>
-      <div class="col-md-4 why-item">
-        <div class="icon bg-warning">⏰</div>
-        <h6>Linh hoạt thời gian</h6>
-        <p>Học online hoặc offline</p>
-      </div>
-    </div>
-  </div>
-</section>
 <section class="steps text-center">
   <div class="container">
     <h3>Cách thức hoạt động</h3>
