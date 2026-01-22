@@ -2,13 +2,15 @@
 session_start();
 require 'config/db.php'; 
 
+// Thiết lập múi giờ
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     header("Location: find-class.php");
     exit();
 }
 $class_id = intval($_GET['id']);
 
-// 1. CẬP NHẬT QUERY ĐỂ LẤY THÊM THÔNG TIN GIA SƯ
 $sql = "SELECT c.*, 
                u.full_name as tutor_name, 
                u.email as tutor_email, 
@@ -29,7 +31,7 @@ if ($result->num_rows == 0) {
 }
 $row = $result->fetch_assoc();
 
-// Kiểm tra trạng thái đăng ký của học viên hiện tại
+// Kiểm tra trạng thái đăng ký
 $registration_status = null;
 if (isset($_SESSION['user_id'])) {
     $stu_id = $_SESSION['user_id'];
@@ -42,33 +44,27 @@ if (isset($_SESSION['user_id'])) {
     }
 }
 
+// Logic kiểm tra hiển thị nút Báo cáo
+$show_report = false;
+if ($registration_status == 'accepted' && !empty($row['start_date'])) {
+    $today = date('Y-m-d');
+    if ($today >= $row['start_date']) {
+        $show_report = true;
+    }
+}
+
 $badge_class = ($row['status'] == 'active') ? 'badge green' : 'badge red';
 $status_text = ($row['status'] == 'active') ? 'Đang tuyển sinh' : 'Đã đóng';
 
 // Xử lý giá tiền
 $price_raw = $row['price'];
-$price_display = '';
-$unit_display = '';
+$price_display = is_numeric($price_raw) ? number_format($price_raw, 0, ',', '.') . ' đ' : $price_raw;
+$unit_display = is_numeric($price_raw) ? '/ buổi' : '';
 
-if (is_numeric($price_raw)) {
-    $price_display = number_format($price_raw, 0, ',', '.') . ' đ';
-    $unit_display = '/ buổi';
-} elseif (preg_match('/^(\d+)\s+(.*)$/', $price_raw, $matches)) {
-    $price_display = number_format($matches[1], 0, ',', '.') . ' đ';
-    $unit_clean = trim(str_replace('VND', '', $matches[2]));
-    $unit_display = (strpos($unit_clean, '/') === 0) ? $unit_clean : '/ ' . $unit_clean;
-} else {
-    $price_display = $price_raw;
-    $unit_display = '';
-}
-
-// 2. XỬ LÝ AVATAR GIA SƯ
+// Xử lý Avatar
 $tutorName = $row['tutor_name'] ?? 'Gia sư';
 $initials = mb_strtoupper(mb_substr($tutorName, 0, 1, "UTF-8"));
-$avatar_url = "";
-if (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row['tutor_avatar'])) {
-    $avatar_url = "assets/uploads/avatars/" . $row['tutor_avatar'];
-}
+$avatar_url = (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row['tutor_avatar'])) ? "assets/uploads/avatars/" . $row['tutor_avatar'] : "";
 ?>
 
 <!DOCTYPE html>
@@ -83,7 +79,6 @@ if (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row
         .register-box { background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .alert-floating { position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; animation: slideIn 0.5s ease; }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        /* CSS cho Avatar */
         .tutor-avatar-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #e9ecef; margin: 0 auto; display: block; }
     </style>
 </head>
@@ -92,19 +87,17 @@ if (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row
 <?php include 'includes/header.php'; ?>
 
 <?php if (isset($_SESSION['success'])): ?>
-    <div class="alert alert-success alert-floating shadow border-0" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i> <?= $_SESSION['success']; ?>
+    <div class="alert alert-success alert-floating shadow border-0">
+        <i class="bi bi-check-circle-fill me-2"></i> <?= $_SESSION['success']; unset($_SESSION['success']); ?>
         <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
     </div>
-    <?php unset($_SESSION['success']); ?>
 <?php endif; ?>
 
 <?php if (isset($_SESSION['error'])): ?>
-    <div class="alert alert-danger alert-floating shadow border-0" role="alert">
-        <i class="bi bi-exclamation-circle-fill me-2"></i> <?= $_SESSION['error']; ?>
+    <div class="alert alert-danger alert-floating shadow border-0">
+        <i class="bi bi-exclamation-circle-fill me-2"></i> <?= $_SESSION['error']; unset($_SESSION['error']); ?>
         <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
     </div>
-    <?php unset($_SESSION['error']); ?>
 <?php endif; ?>
 
 <div class="container py-5">
@@ -115,7 +108,6 @@ if (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row
     </div>
 
     <div class="row g-4">
-        
         <div class="col-lg-8">
             <div class="card card-detail">
                 <div class="mb-3">
@@ -127,31 +119,23 @@ if (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row
                 <h2 class="fw-bold text-dark mb-3"><?= htmlspecialchars($row['title']) ?></h2>
 
                 <div class="d-flex flex-wrap gap-4 text-secondary mb-4">
-                   <div class="d-flex align-items-center">
-                       <i class="bi bi-mortarboard me-2 text-brand"></i> 
-                       <?= htmlspecialchars($row['grade']) ?>
-                   </div>
-                   <div class="d-flex align-items-center">
-                       <?php if($row['method'] == 'Online'): ?>
-                           <i class="bi bi-camera-video me-2 text-brand"></i> Online
-                       <?php else: ?>
-                           <i class="bi bi-geo-alt me-2 text-brand"></i> 
-                           <?= htmlspecialchars($row['location']) ?>
-                       <?php endif; ?>
-                   </div>
-                   <div class="d-flex align-items-center">
-                       <i class="bi bi-clock-history me-2 text-brand"></i> 
-                       <?= date('d/m/Y', strtotime($row['created_at'])) ?>
+                   <div class="d-flex align-items-center"><i class="bi bi-mortarboard me-2 text-brand"></i> <?= htmlspecialchars($row['grade']) ?></div>
+                   <div class="d-flex align-items-center"><i class="bi bi-geo-alt me-2 text-brand"></i> <?= htmlspecialchars($row['location']) ?></div>
+                   <div class="d-flex align-items-center"><i class="bi bi-calendar-check me-2 text-brand"></i> 
+                        <?php 
+                            if (!empty($row['start_date']) && !empty($row['end_date'])) {
+                                echo date('d/m/Y', strtotime($row['start_date'])) . " - " . date('d/m/Y', strtotime($row['end_date']));
+                            } else {
+                                echo "Chưa cập nhật";
+                            }
+                        ?>
                    </div>
                 </div>
 
                 <hr class="text-muted opacity-25">
-
                 <div class="d-flex align-items-end">
                     <h3 class="text-primary fw-bold mb-0 me-2"><?= $price_display ?></h3>
-                    <?php if(!empty($unit_display)): ?>
-                        <span class="text-muted pb-1"><?= htmlspecialchars($unit_display) ?></span>
-                    <?php endif; ?>
+                    <?php if(!empty($unit_display)): ?><span class="text-muted pb-1"><?= htmlspecialchars($unit_display) ?></span><?php endif; ?>
                 </div>
             </div>
 
@@ -160,66 +144,25 @@ if (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row
                 <div class="text-dark" style="line-height: 1.6;">
                     <?= nl2br(htmlspecialchars($row['description'] ?? 'Chưa có mô tả chi tiết.')) ?>
                 </div>
-                
-                <div class="mt-4 p-3 bg-light rounded border border-light">
-                    <strong><i class="bi bi-calendar-week me-2 text-brand"></i>Lịch học dự kiến:</strong> 
-                    <span class="ms-1">Thỏa thuận trực tiếp với gia sư sau khi nhận lớp.</span>
-                </div>
             </div>
         </div>
 
         <div class="col-lg-4">
-            
             <div class="card card-detail text-center">
                 <h5 class="fw-bold mb-4">Thông tin Gia sư</h5>
-                
-                <a href="student/tutor_profile.php?id=<?= $row['tutor_id'] ?>" class="text-decoration-none" title="Xem hồ sơ chi tiết">
+                <a href="student/tutor_profile.php?id=<?= $row['tutor_id'] ?>" class="text-decoration-none">
                     <?php if ($avatar_url): ?>
                         <img src="<?= $avatar_url ?>" class="tutor-avatar-img mb-3 shadow-sm hover-scale">
                     <?php else: ?>
-                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm hover-scale" style="width: 100px; height: 100px; font-size: 40px; font-weight: bold;">
-                            <?= $initials ?>
-                        </div>
+                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px; font-size: 40px; font-weight: bold;"><?= $initials ?></div>
                     <?php endif; ?>
                 </a>
+                <h6 class="fw-bold fs-5 mb-1"><?= htmlspecialchars($tutorName) ?></h6>
                 
-                <h6 class="fw-bold fs-5 mb-1">
-                    <a href="student/tutor_profile.php?id=<?= $row['tutor_id'] ?>" class="text-dark text-decoration-none hover-brand">
-                        <?= htmlspecialchars($tutorName) ?>
-                    </a>
-                </h6>
-                
-                <div class="small text-muted mb-3">
-                    <a href="student/tutor_profile.php?id=<?= $row['tutor_id'] ?>" class="text-secondary text-decoration-none">
-                        <i class="bi bi-eye"></i> Xem hồ sơ đầy đủ
-                    </a>
-                </div>
-
-                <div class="text-warning mb-3">
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                </div>
-
-                <div class="text-start bg-light p-3 rounded mb-3 small">
-                    <div class="mb-2">
-                        <i class="bi bi-mortarboard-fill text-muted me-2"></i>
-                        <strong>Trình độ:</strong> <?= htmlspecialchars($row['degree'] ?? 'Chưa cập nhật') ?>
-                    </div>
-                    <div class="mb-2">
-                        <i class="bi bi-book-half text-muted me-2"></i>
-                        <strong>Chuyên ngành:</strong> <?= htmlspecialchars($row['major'] ?? 'Chưa cập nhật') ?>
-                    </div>
-                    <div class="mb-2">
-                        <i class="bi bi-briefcase-fill text-muted me-2"></i>
-                        <strong>Kinh nghiệm:</strong> <?= htmlspecialchars($row['experience'] ?? 'Chưa cập nhật') ?>
-                    </div>
-                    <div>
-                        <i class="bi bi-geo-alt-fill text-muted me-2"></i>
-                        <strong>Khu vực:</strong> <?= htmlspecialchars($row['tutor_address'] ?? 'Chưa cập nhật') ?>
-                    </div>
+                <div class="text-start bg-light p-3 rounded mb-3 mt-3 small">
+                    <div class="mb-2"><i class="bi bi-mortarboard-fill text-muted me-2"></i><strong>Trình độ:</strong> <?= htmlspecialchars($row['degree'] ?? 'Chưa cập nhật') ?></div>
+                    <div class="mb-2"><i class="bi bi-book-half text-muted me-2"></i><strong>Chuyên ngành:</strong> <?= htmlspecialchars($row['major'] ?? 'Chưa cập nhật') ?></div>
+                    <div><i class="bi bi-geo-alt-fill text-muted me-2"></i><strong>Khu vực:</strong> <?= htmlspecialchars($row['tutor_address'] ?? 'Chưa cập nhật') ?></div>
                 </div>
                 
                 <?php if ($registration_status == 'accepted'): ?>
@@ -233,7 +176,44 @@ if (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row
                         <a href="tel:<?= htmlspecialchars($row['tutor_phone']) ?>" class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-telephone"></i> <?= htmlspecialchars($row['tutor_phone'] ?? 'Chưa cập nhật SĐT') ?>
                         </a>
-                    </div>
+
+                        <?php 
+                            // Kiểm tra xem user này đã báo cáo lớp này chưa
+                            $stu_id = $_SESSION['user_id'];
+                            $chk_report = $conn->query("SELECT * FROM reports WHERE student_id = $stu_id AND class_id = $class_id ORDER BY id DESC LIMIT 1");
+                            $my_report = $chk_report->fetch_assoc();
+                        ?>
+
+                        <?php if($my_report): ?>
+                            <div class="mt-3">
+                                <?php if($my_report['status'] == 'pending'): ?>
+                                    <div class="alert alert-warning small mb-0 border-warning">
+                                        <i class="bi bi-hourglass-split"></i> Đã gửi báo cáo. Đang chờ xử lý.
+                                    </div>
+                                <?php elseif($my_report['status'] == 'approved'): ?>
+                                    <div class="alert alert-success small mb-0 border-success">
+                                        <i class="bi bi-check-circle-fill"></i> <strong>Báo cáo thành công!</strong><br>
+                                        Admin đã xử lý vi phạm của gia sư.
+                                    </div>
+                                <?php elseif($my_report['status'] == 'rejected'): ?>
+                                    <div class="alert alert-danger small mb-0 border-danger">
+                                        <i class="bi bi-x-circle-fill"></i> <strong>Báo cáo bị từ chối!</strong><br>
+                                        <hr class="my-1">
+                                        <strong>Lý do từ Admin:</strong> <?= htmlspecialchars($my_report['admin_reply'] ?? 'Không có lý do') ?>
+                                    </div>
+                                    <?php if($show_report): ?>
+                                        <button type="button" class="btn btn-outline-danger btn-sm mt-2 w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#reportModal">
+                                            <i class="bi bi-flag-fill me-1"></i> Gửi báo cáo lại
+                                        </button>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
+                        <?php elseif($show_report): ?>
+                            <button type="button" class="btn btn-outline-danger btn-sm mt-2 fw-bold" data-bs-toggle="modal" data-bs-target="#reportModal">
+                                <i class="bi bi-flag-fill me-1"></i> Báo cáo gia sư
+                            </button>
+                        <?php endif; ?>
+                        </div>
                 <?php else: ?>
                     <p class="small text-muted fst-italic border-top pt-3">
                         <i class="bi bi-lock-fill"></i> Số điện thoại và Email sẽ hiển thị sau khi yêu cầu đăng ký của bạn được chấp nhận.
@@ -243,34 +223,30 @@ if (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row
 
             <div class="card card-detail p-4 register-box border-success border-top border-4">
                 <h5 class="fw-bold mb-3">Đăng ký học</h5>
-
                 <?php if (!isset($_SESSION['user_id'])): ?>
                     <p class="text-muted small mb-3">Bạn cần đăng nhập để đăng ký lớp học này.</p>
                     <a href="auth/login_register.php" class="btn btn-brand w-100">Đăng nhập ngay</a>
-
                 <?php elseif ($row['status'] != 'active'): ?>
-                    <div class="alert alert-secondary text-center m-0">
-                        <i class="bi bi-lock-fill"></i> Lớp này đã đóng
-                    </div>
-
+                    <div class="alert alert-secondary text-center m-0"><i class="bi bi-lock-fill"></i> Lớp này đã đóng</div>
                 <?php elseif ($_SESSION['role'] == 'tutor' || $_SESSION['role'] == 'admin'): ?>
-                     <div class="alert alert-warning text-center small m-0">
-                        Bạn đang đăng nhập với tư cách Gia sư/Admin nên không thể đăng ký học.
-                     </div>
-
+                     <div class="alert alert-warning text-center small m-0">Bạn đang đăng nhập với tư cách Gia sư/Admin.</div>
                 <?php else: ?>
                     <?php if ($registration_status == 'pending'): ?>
-                        <div class="alert alert-info text-center m-0">
-                            <i class="bi bi-hourglass-split"></i> Đã gửi yêu cầu. <br>Vui lòng chờ gia sư duyệt.
+                        <div class="alert alert-info text-center m-0 mb-3">
+                            <i class="bi bi-hourglass-split"></i> Yêu cầu đang chờ Gia sư duyệt.
                         </div>
+                        
+                        <form action="student/cancel_registration.php" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn hủy yêu cầu đăng ký này?');">
+                            <input type="hidden" name="class_id" value="<?= $row['id'] ?>">
+                            <button type="submit" class="btn btn-outline-secondary w-100 btn-sm fw-bold">
+                                <i class="bi bi-x-circle me-1"></i> Hủy đăng ký
+                            </button>
+                        </form>
+
                     <?php elseif ($registration_status == 'accepted'): ?>
-                        <div class="alert alert-success text-center m-0">
-                            <i class="bi bi-check-circle-fill"></i> Yêu cầu đã được chấp nhận!
-                        </div>
+                        <div class="alert alert-success text-center m-0"><i class="bi bi-check-circle-fill"></i> Đã tham gia.</div>
                     <?php elseif ($registration_status == 'rejected'): ?>
-                        <div class="alert alert-danger text-center m-0">
-                            <i class="bi bi-x-circle-fill"></i> Yêu cầu đã bị từ chối.
-                        </div>
+                        <div class="alert alert-danger text-center m-0"><i class="bi bi-x-circle-fill"></i> Bị từ chối.</div>
                     <?php else: ?>
                         <?php 
                             $check_again = $conn->query("SELECT id FROM class_registrations WHERE class_id=$class_id AND student_id=" . $_SESSION['user_id']);
@@ -278,40 +254,70 @@ if (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avatars/" . $row
                         ?>
                         <form action="/N14LURNY/student/handle_register.php" method="POST" onsubmit="return confirm('Gửi đăng ký?');">
                             <input type="hidden" name="class_id" value="<?= $row['id'] ?>">
-                            
                             <div class="mb-3">
-                                <label class="form-label small fw-bold">Lời nhắn cho gia sư (Tùy chọn):</label>
-                                <textarea name="message" class="form-control form-control-sm" rows="3" placeholder="Ví dụ: Em cần bổ trợ kiến thức hình học..."></textarea>
+                                <label class="form-label small fw-bold">Lời nhắn cho gia sư:</label>
+                                <textarea name="message" class="form-control form-control-sm" rows="3"></textarea>
                             </div>
-
-                            <button type="submit" class="btn btn-brand w-100 py-2 fw-bold text-uppercase shadow-sm">
-                                <i class="bi bi-send-fill me-2"></i> Gửi yêu cầu ngay
-                            </button>
+                            <button type="submit" class="btn btn-brand w-100 py-2 fw-bold text-uppercase shadow-sm"><i class="bi bi-send-fill me-2"></i> Gửi yêu cầu ngay</button>
                         </form>
                         <?php else: ?>
                              <div class="alert alert-info text-center m-0">Bạn đã đăng ký lớp này.</div>
                         <?php endif; ?>
                     <?php endif; ?>
-
                 <?php endif; ?>
             </div>
-
-            <div class="alert alert-warning border-warning shadow-sm mt-3">
-                <div class="d-flex">
-                    <i class="bi bi-shield-exclamation fs-4 me-3"></i>
-                    <div>
-                        <strong class="d-block mb-1 text-dark">Lưu ý an toàn</strong>
-                        <small class="text-muted">Tuyệt đối không chuyển khoản đặt cọc trước khi gặp mặt gia sư.</small>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 </div>
 
+<?php if($show_report): ?>
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill me-2"></i> Báo cáo Gia sư</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form action="/N14LURNY/student/handle_report.php" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="class_id" value="<?= $class_id ?>">
+            <input type="hidden" name="tutor_id" value="<?= $row['tutor_id'] ?>">
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold">Lý do báo cáo:</label>
+                <select name="reason" class="form-select" required>
+                    <option value="">-- Chọn lý do --</option>
+                    <option value="Chất lượng dạy kém">Chất lượng dạy không đảm bảo</option>
+                    <option value="Gia sư thường xuyên hủy lịch">Thường xuyên hủy lịch / Đi muộn</option>
+                    <option value="Thái độ không tốt">Thái độ ứng xử không phù hợp</option>
+                    <option value="Thu phí ngoài luồng">Yêu cầu thu thêm phí ngoài thỏa thuận</option>
+                    <option value="Khác">Lý do khác</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold">Mô tả chi tiết sự việc:</label>
+                <textarea name="description" class="form-control" rows="4" placeholder="Vui lòng mô tả rõ vấn đề bạn gặp phải..." required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Hình ảnh minh chứng (Nếu có):</label>
+                <input type="file" name="proof_image" class="form-control" accept="image/*">
+                <div class="form-text small">Chỉ chấp nhận file ảnh (JPG, PNG, JPEG). Tối đa 5MB.</div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="submit" class="btn btn-danger">Gửi báo cáo</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
 <?php include 'includes/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th1 20, 2026 lúc 11:18 AM
+-- Thời gian đã tạo: Th1 22, 2026 lúc 11:30 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -20,6 +20,24 @@ SET time_zone = "+00:00";
 --
 -- Cơ sở dữ liệu: `tutor_db`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `appeals`
+--
+
+CREATE TABLE `appeals` (
+  `id` int(11) NOT NULL,
+  `report_id` int(11) NOT NULL COMMENT 'Khiếu nại cho báo cáo nào',
+  `tutor_id` int(11) NOT NULL COMMENT 'Gia sư khiếu nại',
+  `content` text NOT NULL COMMENT 'Nội dung khiếu nại',
+  `evidence_image` varchar(255) DEFAULT NULL COMMENT 'Ảnh minh chứng',
+  `status` enum('pending','approved','rejected') DEFAULT 'pending',
+  `admin_reply` text DEFAULT NULL COMMENT 'Lý do từ chối của Admin',
+  `attempt_number` int(11) DEFAULT 1 COMMENT 'Lần khiếu nại thứ mấy (max 2)',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -61,12 +79,9 @@ INSERT INTO `classes` (`id`, `tutor_id`, `title`, `subject`, `grade`, `price`, `
 (10, 8, 'aaâf', 'Toán', 'Lớp 1', '300000 VND/Giờ', 'Mô tả: fff\nSố học viên: 1\nLịch học: \nYêu cầu: ', 'Offline', '', 'active', 1, NULL, NULL, '2026-01-13 04:50:26'),
 (11, 8, 'scasa', 'Lý', 'Lớp 1', '2000000 VND/Giờ', 'Mô tả: casc\nSố học viên: 6\nLịch học: cac\nYêu cầu: wfwer', 'Online', 'asc', 'active', 1, NULL, NULL, '2026-01-13 09:43:35'),
 (12, 11, 'adddaa', 'Toán', 'Lớp 1', '2000000 VND/Giờ', 'Mô tả: âsấ\nSố học viên: 1\nLịch học: ắè\nYêu cầu: ầẻdsf', 'Offline', '10 nguyễn xuân hiệp, Xã Trung Lập Hạ, Huyện Củ Chi, TP. Hồ Chí Minh', 'active', 1, NULL, NULL, '2026-01-14 07:45:00'),
-(14, 12, 'xZSD', 'Toán', 'Lớp 1', '300000 VND/Giờ', 'Mô tả: sdfcvW\nSố học viên: 1\nLịch học: ÁcdSAC\nYêu cầu: ', 'Online', 'XVASDVF', 'hidden', 1, '2026-01-16', '2026-01-23', '2026-01-15 18:23:54'),
-(15, 12, 'xxx', 'Toán', 'Lớp 1', '390000 VND/Giờ', 'Mô tả: xxx\nSố học viên: 10\nLịch học: xxx\nYêu cầu: ', 'Offline', 'xx, Phường Trung Mỹ Tây, Quận 12, TP. Hồ Chí Minh', 'hidden', 1, '2026-01-24', '2026-02-07', '2026-01-15 18:49:11'),
-(16, 12, 'ấ', 'Toán', 'Lớp 1', '300000 VND/Giờ', 'Mô tả: á\nSố học viên: 5\nLịch học: qàewq\nYêu cầu: ', 'Offline', 'qadfqewa, Phường 11, Quận Phú Nhuận, TP. Hồ Chí Minh', 'active', 1, '2026-01-24', '2026-02-07', '2026-01-15 19:04:57'),
-(17, 12, 'ads', 'Toán', 'Lớp 1', '4000000 VND/Giờ', 'Mô tả: \nLịch học: ZX C\nYêu cầu: ', 'Offline', 'zx c, Phường 4, Quận 8, TP. Hồ Chí Minh', 'active', 6, '2026-01-24', '2026-02-08', '2026-01-15 19:14:50'),
 (18, 13, 'âcs', 'Toán', 'Lớp 1', '3000000 VND/Giờ', 'Mô tả: dasa\nLịch học: áda\nYêu cầu: ', 'Offline', 'cfasdcasecd, Phường Linh Tây, Quận Thủ Đức, TP. Hồ Chí Minh', 'closed', 1, '2026-01-20', '2026-01-30', '2026-01-20 10:14:00'),
-(19, 13, 'WQEF', 'Toán', 'Lớp 1', '3000000 VND/Giờ', 'Mô tả: \nLịch học: ằGWEARF\nYêu cầu: ', 'Offline', 'qwfawe, Phường 22, Quận Bình Thạnh, TP. Hồ Chí Minh', 'hidden', 1, '2026-01-29', '2026-02-06', '2026-01-20 10:15:34');
+(19, 13, 'WQEF', 'Toán', 'Lớp 1', '3000000 VND/Giờ', 'Mô tả: \nLịch học: ằGWEARF\nYêu cầu: ', 'Offline', 'qwfawe, Phường 22, Quận Bình Thạnh, TP. Hồ Chí Minh', 'hidden', 1, '2026-01-29', '2026-02-06', '2026-01-20 10:15:34'),
+(20, 13, 'vsef', 'Toán', 'Lớp 1', '30000 VND/Giờ', 'Mô tả: qè\nLịch học: wafw\nYêu cầu: ', 'Offline', 'fqwef, Phường 12, Quận Gò Vấp, TP. Hồ Chí Minh', 'active', 6, '2026-01-24', '2026-02-07', '2026-01-22 18:16:34');
 
 -- --------------------------------------------------------
 
@@ -90,11 +105,8 @@ CREATE TABLE `class_registrations` (
 
 INSERT INTO `class_registrations` (`id`, `class_id`, `student_id`, `status`, `message`, `tutor_note`, `created_at`) VALUES
 (1, 7, 9, 'accepted', 'ád', NULL, '2026-01-09 04:21:18'),
-(2, 12, 9, 'pending', 'âsá', NULL, '2026-01-14 09:17:36'),
-(4, 14, 9, 'accepted', 'ad', NULL, '2026-01-15 18:36:25'),
-(5, 15, 7, 'accepted', 'ccc', NULL, '2026-01-15 19:03:40'),
-(6, 17, 9, 'accepted', 'szvdfc', NULL, '2026-01-15 19:15:58'),
-(7, 19, 14, 'accepted', 'qwdw', NULL, '2026-01-20 10:16:45');
+(7, 19, 14, 'accepted', 'qwdw', NULL, '2026-01-20 10:16:45'),
+(8, 20, 15, 'accepted', 'qd', NULL, '2026-01-22 18:17:38');
 
 -- --------------------------------------------------------
 
@@ -131,7 +143,16 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `is_read`, `link`, `created_at`) VALUES
-(1, 14, 'Đăng ký thành công! ✅', 'Chúc mừng! Gia sư đã duyệt bạn vào lớp: WQEF. Xem chi tiết để lấy SĐT liên hệ.', 0, 'class-detail.php?id=19', '2026-01-20 10:17:19');
+(1, 14, 'Đăng ký thành công! ✅', 'Chúc mừng! Gia sư đã duyệt bạn vào lớp: WQEF. Xem chi tiết để lấy SĐT liên hệ.', 0, 'class-detail.php?id=19', '2026-01-20 10:17:19'),
+(2, 13, 'Học viên mới đăng ký 🎓', 'Học viên <strong>1</strong> vừa đăng ký lớp: <strong>vsef</strong>. Hãy kiểm tra ngay.', 1, 'see_details.php?id=20', '2026-01-22 18:17:38'),
+(3, 15, 'Đăng ký thành công! ✅', 'Chúc mừng! Gia sư đã duyệt bạn vào lớp: <strong>vsef</strong>. Nhấn vào đây để xem thông tin liên hệ.', 1, 'class-detail.php?id=20', '2026-01-22 18:18:05'),
+(4, 9, 'Báo cáo bị từ chối ❌', 'Báo cáo bị từ chối.<br>Lý do: fwefwe', 1, NULL, '2026-01-22 21:03:59'),
+(5, 9, 'Báo cáo bị từ chối ❌', 'Báo cáo bị từ chối.<br>Lý do: fwefwe', 1, NULL, '2026-01-22 21:04:23'),
+(6, 9, 'Báo cáo thành công ✅', 'Báo cáo của bạn đã được xử lý.', 1, NULL, '2026-01-22 21:04:47'),
+(7, 9, 'Báo cáo bị từ chối ❌', 'Báo cáo bị từ chối.<br>Lý do: c fg', 1, NULL, '2026-01-22 21:05:02'),
+(8, 9, 'Báo cáo bị từ chối ❌', 'Báo cáo bị từ chối.<br>Nhấn vào đây để xem lý do chi tiết từ Admin.', 1, 'class-detail.php?id=14', '2026-01-22 21:39:11'),
+(9, 12, 'Khiếu nại thành công ✅', 'Cảnh cáo đã được gỡ bỏ.', 1, 'tutor/class_management.php', '2026-01-22 21:39:19'),
+(10, 9, 'Cập nhật báo cáo ℹ️', 'Báo cáo của bạn bị hủy do gia sư khiếu nại thành công.', 1, 'class-detail.php?id=14', '2026-01-22 21:39:19');
 
 -- --------------------------------------------------------
 
@@ -141,11 +162,15 @@ INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `is_read`, `li
 
 CREATE TABLE `reports` (
   `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL COMMENT 'Người báo cáo',
-  `class_id` int(11) NOT NULL COMMENT 'Lớp bị báo cáo',
-  `reason` text NOT NULL COMMENT 'Lý do báo cáo',
-  `status` enum('pending','processed') NOT NULL DEFAULT 'pending' COMMENT 'Trạng thái xử lý',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `student_id` int(11) NOT NULL COMMENT 'ID Học viên báo cáo',
+  `tutor_id` int(11) NOT NULL COMMENT 'ID Gia sư bị báo cáo',
+  `class_id` int(11) NOT NULL COMMENT 'ID Lớp học',
+  `reason` varchar(255) NOT NULL COMMENT 'Lý do chính',
+  `description` text NOT NULL COMMENT 'Mô tả chi tiết sự việc',
+  `status` enum('pending','approved','rejected') DEFAULT 'pending',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `admin_reply` text DEFAULT NULL COMMENT 'Lý do từ chối/Chấp thuận của Admin',
+  `image_proof` varchar(255) DEFAULT NULL COMMENT 'Ảnh minh chứng báo cáo'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -160,15 +185,6 @@ CREATE TABLE `tutor_proofs` (
   `image_path` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Đang đổ dữ liệu cho bảng `tutor_proofs`
---
-
-INSERT INTO `tutor_proofs` (`id`, `user_id`, `image_path`, `created_at`) VALUES
-(1, 12, 'proof_12_1768895349_0.jpg', '2026-01-20 07:49:09'),
-(2, 12, 'proof_12_1768895349_1.jpg', '2026-01-20 07:49:09'),
-(3, 12, 'proof_12_1768895349_2.jpg', '2026-01-20 07:49:09');
 
 -- --------------------------------------------------------
 
@@ -193,30 +209,40 @@ CREATE TABLE `users` (
   `address` varchar(255) DEFAULT NULL COMMENT 'Địa chỉ/Khu vực',
   `school` varchar(255) DEFAULT NULL,
   `grade` varchar(50) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `warnings_count` int(11) DEFAULT 0 COMMENT 'Số lần bị cảnh cáo',
+  `is_banned` tinyint(1) DEFAULT 0 COMMENT '1: Bị cấm dạy, 0: Bình thường'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `users`
 --
 
-INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `role`, `avatar`, `dob`, `gender`, `phone`, `bio`, `major`, `degree`, `experience`, `address`, `school`, `grade`, `created_at`) VALUES
-(1, 'Admin Quản Trị', 'admin@gmail.com', '$2y$10$fNXThoEgdxdf9nsvXPJwn.9Qpp0mpves1RJ0hPVfafcn4Hm46jnhm', 'admin', NULL, NULL, 'Nam', '0909000000', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12'),
-(2, 'Nguyễn Văn Gia Sư', 'tutor1@gmail.com', '$2y$10$YourHashedPasswordHere', 'tutor', NULL, NULL, 'Nam', '0912345678', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12'),
-(3, 'Trần Thị Cô Giáo', 'tutor2@gmail.com', '$2y$10$YourHashedPasswordHere', 'tutor', NULL, NULL, 'Nam', '0987654321', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12'),
-(4, 'abc', 'student1@gmail.com', '$2y$10$YourHashedPasswordHere', 'student', NULL, NULL, 'Nam', '0933333333', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12'),
-(7, 'abc', 'abc@gmail.com', '$2y$10$Hch33NYyxBQ4s5HKfooy3.W29yCMuPanBww/7TxrClHJD7wv7UCl2', 'student', NULL, NULL, 'Nam', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-31 15:10:09'),
-(8, 'hhh', 'h@gmail.com', '$2y$10$2nDuIl3VMzdW42hxToBXvOUsGNzgtMcF5Hzv9/yNP0XstHmDzdbU6', 'tutor', NULL, NULL, 'Nam', '0134567865', 'đẹp trai', '', 'Sinh viên', '2 năm', '', NULL, NULL, '2026-01-07 08:15:37'),
-(9, 'a', 'a@gmail.com', '$2y$10$1kJpyarTH6jeny50w6j8FevWCjslReHpbgfVKvrZituocwprzCj9q', 'student', 'stu_9_1768897966.jpg', '2018-06-14', 'Nam', '0123456789', NULL, NULL, NULL, NULL, '', '', '', '2026-01-07 08:16:35'),
-(10, 'ad', 'ad@gmail.com', '$2y$10$1OhJVY8X0pBqId86BlJmIOQNc8B7.YibU63yP0FsVW8qu4JGUrMX2', 'tutor', NULL, NULL, 'Nam', 'adàda', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-14 07:13:22'),
-(11, 'abc', 'z@gmail.com', '$2y$10$3.8QH143KzmP3xhbLgNDZOFbb50CZ87m1tULOQOKJ6NjCeckv4yMO', 'tutor', 'user_11_1768376282.png', '2006-02-09', 'Nam', '0323456789', '', '', '', '', '', NULL, NULL, '2026-01-14 07:21:40'),
-(12, 'trâm khùng', 't@gmail.com', '$2y$10$Sl0lln3gzVjOpDDEjHvMsOPsazarK9YUbaKCZ4LxhwB1t2J4CEMzm', 'tutor', NULL, NULL, 'Nam', '0346584598', '', '', '', '', '', NULL, NULL, '2026-01-15 17:56:13'),
-(13, 'ádf', 'q@gmail.com', '$2y$10$fdJDXrvOoz5SMeWxq/DUHeNR0rqullwVstPMCKQuwknkgZ8KKCwP2', 'tutor', NULL, NULL, 'Nam', '0913434524', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-20 10:12:47'),
-(14, '1', 'w@gmail.com', '$2y$10$jDmA7PNW0qMDux92ny3bLuymiJGKPvBqdqrwggshNwO1G2mwPGnhi', 'student', NULL, NULL, 'Nam', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-20 10:16:33');
+INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `role`, `avatar`, `dob`, `gender`, `phone`, `bio`, `major`, `degree`, `experience`, `address`, `school`, `grade`, `created_at`, `warnings_count`, `is_banned`) VALUES
+(1, 'Admin Quản Trị', 'admin@gmail.com', '$2y$10$fNXThoEgdxdf9nsvXPJwn.9Qpp0mpves1RJ0hPVfafcn4Hm46jnhm', 'admin', NULL, NULL, 'Nam', '0909000000', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12', 0, 0),
+(2, 'Nguyễn Văn Gia Sư', 'tutor1@gmail.com', '$2y$10$YourHashedPasswordHere', 'tutor', NULL, NULL, 'Nam', '0912345678', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12', 0, 0),
+(3, 'Trần Thị Cô Giáo', 'tutor2@gmail.com', '$2y$10$YourHashedPasswordHere', 'tutor', NULL, NULL, 'Nam', '0987654321', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12', 0, 0),
+(4, 'abc', 'student1@gmail.com', '$2y$10$YourHashedPasswordHere', 'student', NULL, NULL, 'Nam', '0933333333', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12', 0, 0),
+(7, 'abc', 'abc@gmail.com', '$2y$10$Hch33NYyxBQ4s5HKfooy3.W29yCMuPanBww/7TxrClHJD7wv7UCl2', 'student', 'stu_7_1769103497.jpg', '2015-10-17', 'Nam', '0394684282', NULL, NULL, NULL, NULL, 'âsá', 'dqwdwe', 'Lớp 10', '2025-12-31 15:10:09', 0, 0),
+(8, 'hhh', 'h@gmail.com', '$2y$10$2nDuIl3VMzdW42hxToBXvOUsGNzgtMcF5Hzv9/yNP0XstHmDzdbU6', 'tutor', NULL, NULL, 'Nam', '0134567865', 'đẹp trai', '', 'Sinh viên', '2 năm', '', NULL, NULL, '2026-01-07 08:15:37', 0, 0),
+(9, 'a', 'a@gmail.com', '$2y$10$1kJpyarTH6jeny50w6j8FevWCjslReHpbgfVKvrZituocwprzCj9q', 'student', 'stu_9_1768897966.jpg', '2018-06-14', 'Nam', '0123456789', NULL, NULL, NULL, NULL, '', '', '', '2026-01-07 08:16:35', 0, 0),
+(10, 'ad', 'ad@gmail.com', '$2y$10$1OhJVY8X0pBqId86BlJmIOQNc8B7.YibU63yP0FsVW8qu4JGUrMX2', 'tutor', NULL, NULL, 'Nam', 'adàda', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-14 07:13:22', 0, 0),
+(11, 'abc', 'z@gmail.com', '$2y$10$3.8QH143KzmP3xhbLgNDZOFbb50CZ87m1tULOQOKJ6NjCeckv4yMO', 'tutor', 'user_11_1768376282.png', '2006-02-09', 'Nam', '0323456789', '', '', '', '', '', NULL, NULL, '2026-01-14 07:21:40', 0, 0),
+(13, 'ádf', 'q@gmail.com', '$2y$10$fdJDXrvOoz5SMeWxq/DUHeNR0rqullwVstPMCKQuwknkgZ8KKCwP2', 'tutor', 'user_13_1769103159.jpg', NULL, 'Nam', '0913434524', '', '', '', '', '', NULL, NULL, '2026-01-20 10:12:47', 0, 0),
+(14, '1', 'w@gmail.com', '$2y$10$jDmA7PNW0qMDux92ny3bLuymiJGKPvBqdqrwggshNwO1G2mwPGnhi', 'student', NULL, NULL, 'Nam', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-20 10:16:33', 0, 0),
+(15, '1', '1@gmail.com', '$2y$10$x6nxa17VcG0ey0TW7v6JNOe1MlDt4cs0wcURX0hG4umCc5hL85Uue', 'student', 'stu_15_1769108774.jpg', '0000-00-00', 'Nam', '', NULL, NULL, NULL, NULL, '', '', '', '2026-01-22 18:17:21', 0, 0);
 
 --
 -- Chỉ mục cho các bảng đã đổ
 --
+
+--
+-- Chỉ mục cho bảng `appeals`
+--
+ALTER TABLE `appeals`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_appeal_report` (`report_id`),
+  ADD KEY `fk_appeal_tutor` (`tutor_id`);
 
 --
 -- Chỉ mục cho bảng `classes`
@@ -251,7 +277,10 @@ ALTER TABLE `notifications`
 -- Chỉ mục cho bảng `reports`
 --
 ALTER TABLE `reports`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_report_student` (`student_id`),
+  ADD KEY `fk_report_tutor` (`tutor_id`),
+  ADD KEY `fk_report_class` (`class_id`);
 
 --
 -- Chỉ mục cho bảng `tutor_proofs`
@@ -272,16 +301,22 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT cho bảng `appeals`
+--
+ALTER TABLE `appeals`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT cho bảng `classes`
 --
 ALTER TABLE `classes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT cho bảng `class_registrations`
 --
 ALTER TABLE `class_registrations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT cho bảng `enrollments`
@@ -293,13 +328,13 @@ ALTER TABLE `enrollments`
 -- AUTO_INCREMENT cho bảng `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT cho bảng `reports`
 --
 ALTER TABLE `reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT cho bảng `tutor_proofs`
@@ -311,11 +346,18 @@ ALTER TABLE `tutor_proofs`
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
 --
+
+--
+-- Các ràng buộc cho bảng `appeals`
+--
+ALTER TABLE `appeals`
+  ADD CONSTRAINT `fk_appeal_report` FOREIGN KEY (`report_id`) REFERENCES `reports` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_appeal_tutor` FOREIGN KEY (`tutor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `classes`
@@ -336,6 +378,14 @@ ALTER TABLE `class_registrations`
 ALTER TABLE `enrollments`
   ADD CONSTRAINT `fk_enroll_class` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_enroll_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `reports`
+--
+ALTER TABLE `reports`
+  ADD CONSTRAINT `fk_report_class` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_report_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_report_tutor` FOREIGN KEY (`tutor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `tutor_proofs`

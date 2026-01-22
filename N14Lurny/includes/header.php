@@ -78,32 +78,48 @@ if (isset($_SESSION['user_id'])) {
                 </a>
                 
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="notifDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
-                    <li class="dropdown-header fw-bold border-bottom d-flex justify-content-between align-items-center">
+                    <li class="dropdown-header fw-bold border-bottom d-flex justify-content-between">
                         <span>Thông báo</span>
+                        <?php if($notif_count > 0): ?>
+                            <span class="badge bg-danger rounded-pill"><?= $notif_count ?> mới</span>
+                        <?php endif; ?>
                     </li>
                     
                     <?php if (count($notifications) > 0): ?>
                         <?php foreach($notifications as $notif): ?>
+                            <?php 
+                                $bg_class = ($notif['is_read'] == 0) ? 'bg-light' : 'bg-white';
+                                $fw_class = ($notif['is_read'] == 0) ? 'fw-bold' : 'fw-normal';
+                                $icon_color = ($notif['is_read'] == 0) ? 'text-primary' : 'text-secondary';
+                                
+                                $target_url = $base_url . '/' . $notif['link']; 
+                                $final_link = $base_url . '/includes/mark_read.php?id=' . $notif['id'] . '&url=' . urlencode($target_url);
+                            ?>
                             <li>
-                                <a class="dropdown-item py-2 border-bottom <?= $notif['is_read'] == 0 ? 'bg-light' : '' ?>" href="<?= $base_url ?>/<?= $notif['link'] ?>">
+                                <a class="dropdown-item py-2 border-bottom <?= $bg_class ?>" href="<?= $final_link ?>">
                                     <div class="d-flex align-items-start">
-                                        <?php if(mb_stripos($notif['title'], 'thành công') !== false): ?>
-                                            <i class="bi bi-check-circle-fill text-success mt-1 me-2"></i>
-                                        <?php elseif(mb_stripos($notif['title'], 'từ chối') !== false): ?>
-                                            <i class="bi bi-x-circle-fill text-danger mt-1 me-2"></i>
-                                        <?php else: ?>
-                                            <i class="bi bi-info-circle-fill text-primary mt-1 me-2"></i>
-                                        <?php endif; ?>
-                                        
-                                        <div>
-                                            <strong class="d-block text-dark" style="font-size: 0.9rem;"><?= htmlspecialchars($notif['title']) ?></strong>
-                                            <small class="text-muted d-block text-wrap" style="font-size: 0.8rem; line-height: 1.3;"><?= htmlspecialchars($notif['message']) ?></small>
-                                            <small class="text-secondary" style="font-size: 0.7rem;"><?= date('H:i d/m/Y', strtotime($notif['created_at'])) ?></small>
+                                        <i class="bi bi-info-circle-fill <?= $icon_color ?> mt-1 me-2 fs-5"></i>
+                                        <div class="w-100">
+                                            <div class="d-flex justify-content-between">
+                                                <strong class="d-block text-dark small mb-1"><?= htmlspecialchars($notif['title']) ?></strong>
+                                                <?php if($notif['is_read'] == 0): ?>
+                                                    <span class="badge bg-primary p-1 rounded-circle" style="width: 8px; height: 8px;"> </span>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <div class="text-muted text-wrap small <?= $fw_class ?>" style="line-height: 1.4;">
+                                                <?= $notif['message'] // Cho phép hiển thị HTML (thẻ strong) ?>
+                                            </div>
+                                            
+                                            <small class="text-secondary d-block mt-1" style="font-size: 0.7rem;">
+                                                <?= date('H:i d/m/Y', strtotime($notif['created_at'])) ?>
+                                            </small>
                                         </div>
                                     </div>
                                 </a>
                             </li>
                         <?php endforeach; ?>
+                        <li><a class="dropdown-item text-center small text-primary py-2 fw-bold" href="#">Xem tất cả</a></li>
                     <?php else: ?>
                         <li class="p-4 text-center text-muted small">
                             <i class="bi bi-bell-slash fs-4 d-block mb-2"></i>
@@ -142,12 +158,6 @@ if (isset($_SESSION['user_id'])) {
                     <li>
                         <a class="dropdown-item py-2" href="<?= $base_url ?>/student/dashboard.php">
                             <i class="bi bi-journal-bookmark-fill me-2 text-success"></i> Lớp học của tôi
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item d-flex justify-content-between align-items-center py-2" href="#">
-                            <span><i class="bi bi-wallet-fill me-2 text-success"></i> Ví học tập</span>
-                            <span class="text-success fw-bold small">0 đ</span>
                         </a>
                     </li>
                     

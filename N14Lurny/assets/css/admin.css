@@ -1,34 +1,47 @@
+/* assets/css/admin.css */
 
-/* assets/css/style.css */
-
-/* --- CẤU TRÚC ADMIN MỚI (MENU NGANG) --- */
-.admin-wrapper {
-    display: block; /* QUAN TRỌNG: Đổi từ flex sang block để menu nằm trên cùng */
-    width: 100%;
-    min-height: 100vh;
-    background-color: #f4f6f9; /* Màu nền xám nhạt toàn trang */
+/* =========================================
+   1. CẤU TRÚC CHUNG (LAYOUT)
+   ========================================= */
+body {
+    background-color: #f4f6f9;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    overflow-x: hidden; /* Ngăn thanh cuộn ngang trang */
 }
 
-/* Tùy chỉnh thanh Navbar Admin */
+.admin-wrapper {
+    display: block;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* =========================================
+   2. NAVBAR (MENU NGANG)
+   ========================================= */
 .admin-navbar {
     background-color: #212529; /* Màu đen sang trọng */
     padding: 0.8rem 1rem;
-    margin-bottom: 20px; /* Tạo khoảng cách với nội dung bên dưới */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    position: sticky; /* Giữ menu khi cuộn */
+    top: 0;
+    z-index: 1020; /* Thấp hơn Modal (1050) nhưng cao hơn nội dung */
 }
 
 .admin-brand {
-    font-weight: bold;
-    font-size: 1.25rem;
+    font-weight: 800;
+    font-size: 1.35rem;
     color: #fff !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-/* Link trong menu */
 .admin-navbar .nav-link {
     color: rgba(255,255,255,0.75) !important;
     font-weight: 500;
     margin-right: 15px;
-    border-radius: 5px;
+    border-radius: 6px;
+    padding: 8px 16px !important;
     transition: all 0.2s;
 }
 
@@ -37,50 +50,170 @@
     background-color: rgba(255,255,255,0.15);
 }
 
-/* Trạng thái đang chọn (Active) */
 .admin-navbar .nav-link.active {
     color: #fff !important;
-    background-color: #0d6efd; /* Xanh dương nổi bật */
+    background-color: #0d6efd; /* Xanh dương */
+    font-weight: 600;
 }
 
-/* Nút đăng xuất bên phải */
 .btn-logout {
     border: 1px solid #ff6b6b;
     color: #ff6b6b !important;
-    border-radius: 20px;
-    padding: 5px 20px !important;
+    border-radius: 50px;
+    padding: 6px 20px !important;
     font-size: 0.9rem;
+    transition: 0.3s;
 }
 .btn-logout:hover {
     background-color: #ff6b6b;
     color: white !important;
 }
 
-/* Phần nội dung chính */
+/* =========================================
+   3. NỘI DUNG CHÍNH (CONTENT)
+   ========================================= */
 .admin-content {
-    padding: 0 30px 30px 30px; /* Cách lề cho thoáng */
-    max-width: 1400px; /* Giới hạn chiều rộng để nhìn không bị loãng trên màn hình to */
-    margin: 0 auto; /* Căn giữa nội dung */
+    padding: 0 30px 50px 30px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-/* Card thống kê */
+/* Card Thống kê (Dashboard) */
 .card-counter {
-    padding: 20px;
-    border-radius: 8px;
-    color: white;
-    margin-bottom: 20px;
-}
-/* --- NÚT PASTEL GREEN CUSTOM --- */
-.btn-pastel-green {
-    background-color: #78e08f !important; /* Màu xanh pastel */
-    color: #0a3d32 !important;            /* Chữ màu rêu đậm cho dễ đọc */
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: transform 0.3s;
     border: none;
-    transition: all 0.3s ease;
+    color: white;
+}
+.card-counter:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+.card-counter i { opacity: 0.4; }
+
+/* =========================================
+   4. BẢNG DỮ LIỆU (TABLES)
+   ========================================= */
+.table-responsive {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    background: white;
 }
 
-.btn-pastel-green:hover {
-    background-color: #38ada9 !important; /* Đậm hơn khi di chuột */
-    color: #fff !important;               /* Chữ chuyển sang trắng */
-    transform: translateY(-2px);          /* Hiệu ứng nổi lên nhẹ */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+.table thead th {
+    background-color: #343a40;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 15px;
+    border: none;
+}
+
+.table tbody td {
+    padding: 15px;
+    vertical-align: middle;
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+/* Fix lỗi bảng bị vỡ do nội dung quá dài (Dùng cho trang Report) */
+.description-cell {
+    max-width: 300px;       /* Giới hạn chiều rộng */
+    white-space: normal;    /* Cho phép xuống dòng */
+    word-wrap: break-word;  /* Ngắt từ nếu quá dài */
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+/* Avatar nhỏ trong bảng */
+.table-avatar {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* =========================================
+   5. MODAL & FORMS (FIX LỖI FORM REPORT)
+   ========================================= */
+/* Đảm bảo Modal luôn nằm trên cùng */
+.modal {
+    z-index: 1060 !important;
+}
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+
+/* Style cho Form trong Modal */
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-title {
+    font-weight: 700;
+    color: #212529;
+}
+
+.modal-body {
+    padding: 20px 25px;
+    background-color: #fff;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.form-control, .form-select {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+textarea.form-control {
+    resize: vertical; /* Cho phép kéo giãn chiều dọc */
+    min-height: 100px;
+}
+
+/* Ảnh minh chứng trong Modal Khiếu nại */
+.evidence-box {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px dashed #ced4da;
+    text-align: center;
+}
+
+.evidence-img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.evidence-img:hover {
+    transform: scale(1.02);
+}
+
+/* Nút bấm hành động trong bảng */
+.btn-action {
+    width: 32px; 
+    height: 32px; 
+    padding: 0; 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center;
+    border-radius: 6px;
+    margin: 0 2px;
 }

@@ -1,8 +1,11 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <title>N14Lurny - Kết nối gia sư</title> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -14,10 +17,9 @@
   <div class="container">
     <div class="row align-items-center">
       
-<div class="col-md-5">
-  <img src="assets/images/hinh1.png" class="img-fluid" alt="Wallpaper">
-</div>
-
+      <div class="col-md-5">
+        <img src="assets/images/hinh1.png" class="img-fluid" alt="Wallpaper">
+      </div>
 
       <div class="col-md-7">
         <h1>Kết nối học viên và gia sư</h1>
@@ -27,27 +29,27 @@
         </p>
 
         <form action="find-class.php" method="GET" class="search-box">
-          
           <input 
             type="text" 
             name="keyword" 
             placeholder="Tìm kiếm môn học, gia sư..." 
             required
           >
-          
           <button type="submit">Tìm kiếm</button>
-        
         </form>
 
         <div class="mt-3">
           <a href="find-class.php" class="btn btn-success me-2">Tìm gia sư</a>
-          <a href="auth/login_register.php" class="btn btn-outline-success">Tôi muốn làm gia sư</a>
+          <?php if(!isset($_SESSION['user_id'])): ?>
+            <a href="auth/login_register.php" class="btn btn-outline-success">Tôi muốn làm gia sư</a>
+          <?php endif; ?>
         </div>
       </div>
 
     </div>
   </div>
 </section>
+
 <section class="why">
   <div class="container text-center">
     <h3>Tại sao chọn N14Lurny?</h3>
@@ -99,10 +101,15 @@
     </div>
   </div>
 </section>
+
 <section class="cta">
   <h3>Sẵn sàng bắt đầu?</h3>
   <p>Tham gia cộng đồng hàng nghìn học viên và gia sư</p>
-  <a href="auth/login_register.php" class="btn btn-light me-2">Đăng ký ngay</a>
+  
+  <?php if(!isset($_SESSION['user_id'])): ?>
+      <a href="auth/login_register.php" class="btn btn-light me-2">Đăng ký ngay</a>
+  <?php endif; ?>
+  
   <a href="find-class.php" class="btn btn-outline-light">Khám phá lớp học</a>
 </section>
 
@@ -115,11 +122,11 @@
       </div>
       <div class="col-md-3">
         <h6>Dành cho học viên</h6>
-        <p>Tìm gia sư<br>Đăng ký học</p>
+        <p><a href="find-class.php" class="text-white text-decoration-none">Tìm gia sư</a><br>Đăng ký học</p>
       </div>
       <div class="col-md-3">
         <h6>Dành cho gia sư</h6>
-        <p>Tìm lớp<br>Đăng ký dạy</p>
+        <p><a href="find-class.php" class="text-white text-decoration-none">Tìm lớp</a><br>Đăng ký dạy</p>
       </div>
       <div class="col-md-3">
         <h6>Hỗ trợ</h6>
@@ -131,4 +138,3 @@
 
 </body>
 </html>
-

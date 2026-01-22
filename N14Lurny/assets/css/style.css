@@ -1,6 +1,6 @@
 /* ==========================================================================
    MỤC LỤC:
-   1. GLOBAL & VARIABLES (Biến màu sắc, Reset)
+   1. GLOBAL & VARIABLES (Biến màu sắc, Reset) - ĐÃ CẬP NHẬT MÀU XANH ĐẬM
    2. HEADER & NAVBAR
    3. FOOTER
    4. UI COMPONENTS
@@ -8,17 +8,16 @@
    6. HOME PAGE (Trang chủ)
    7. SEARCH & FILTER
    8. CARDS
-   9. PROFILE & DETAIL PAGES
-   10. BOOTSTRAP OVERRIDES (FIX MÀU XANH DƯƠNG -> XANH LÁ) <--- MỚI
+   9. BOOTSTRAP OVERRIDES (FIX LỖI MÀU XANH DƯƠNG) <--- QUAN TRỌNG
    ========================================================================== */
 
 /* =========================================
-   1. GLOBAL & VARIABLES (BẢNG MÀU XANH LÁ ĐẬM)
+   1. GLOBAL & VARIABLES
    ========================================= */
 :root {
-    /* Màu chủ đạo: Forest Green (Xanh lá đậm) */
+    /* Màu chủ đạo: Forest Green (Xanh lá đậm - Giống Gia sư) */
     --primary-color: #1b5e20;       
-    --primary-hover: #2e7d32;       
+    --primary-hover: #144518;       
     --primary-light: #e8f5e9;       
     --primary-text: #1b5e20;        
     
@@ -83,7 +82,7 @@ a:hover { color: var(--primary-hover); }
    ========================================= */
 .footer { 
     background-color: var(--primary-color); 
-    color: var(--primary-light); 
+    color: var(--white); 
     padding: 60px 0 40px; margin-top: auto; 
 }
 .footer h6 { color: var(--white); font-weight: 700; margin-bottom: 20px; }
@@ -93,12 +92,12 @@ a:hover { color: var(--primary-hover); }
 /* =========================================
    4. UI COMPONENTS
    ========================================= */
-.btn-brand, .btn-primary, .btn-success {
+.btn-brand, .btn-success {
     background-color: var(--primary-color); border-color: var(--primary-color); color: var(--white);
     font-weight: 600; padding: 10px 24px; border-radius: 8px; transition: all 0.2s;
     box-shadow: 0 4px 6px -1px rgba(27, 94, 32, 0.2);
 }
-.btn-brand:hover, .btn-primary:hover, .btn-success:hover {
+.btn-brand:hover, .btn-success:hover {
     background-color: var(--primary-hover); border-color: var(--primary-hover);
     transform: translateY(-2px);
 }
@@ -112,7 +111,6 @@ a:hover { color: var(--primary-hover); }
 
 .badge.green { background-color: var(--primary-light); color: var(--primary-text); padding: 6px 12px; border-radius: 20px; font-weight: 600; }
 .badge.gray { background-color: #e9ecef; color: #495057; padding: 6px 12px; border-radius: 20px; border: 1px solid #dee2e6; }
-.badge.red { background-color: #fee2e2; color: #991b1b; padding: 6px 12px; border-radius: 20px; font-weight: 600; }
 
 .form-control, .form-select {
     border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 15px; font-size: 0.95rem;
@@ -133,6 +131,7 @@ a:hover { color: var(--primary-hover); }
     background: white; width: 100%; max-width: 500px; padding: 2rem;
     border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
+/* Radio chọn vai trò */
 .role-selector { display: flex; gap: 15px; }
 .role-option { flex: 1; }
 .role-radio { display: none; }
@@ -174,13 +173,22 @@ a:hover { color: var(--primary-hover); }
 }
 .search-box button:hover { background-color: var(--primary-hover); }
 
+/* Why choose us */
 .why, .steps { padding: 60px 0; }
 .why-item, .step { padding: 20px; transition: 0.3s; }
-.why-item .icon { font-size: 2.5rem; margin-bottom: 15px; color: var(--primary-color); }
+
+.why-item .icon { 
+    width: 100px; height: 100px; border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center; 
+    margin: 0 auto 20px; font-size: 2.5rem; color: #fff !important; 
+    box-shadow: var(--shadow-sm);
+}
+
 .step .circle {
-    width: 50px; height: 50px; background: var(--primary-color); color: white;
+    width: 60px; height: 60px; background: var(--primary-color); color: white;
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-weight: bold; font-size: 1.2rem; margin: 0 auto 15px;
+    font-weight: bold; font-size: 1.5rem; margin: 0 auto 15px;
+    box-shadow: var(--shadow-sm);
 }
 .cta { background: var(--primary-color); color: white; text-align: center; padding: 60px 0; }
 
@@ -205,10 +213,7 @@ a:hover { color: var(--primary-hover); }
     border-radius: 50px; padding: 0 25px; height: 40px; font-size: 0.9rem; font-weight: 600;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.sidebar-sticky {
-    position: -webkit-sticky; position: sticky;
-    top: 90px; z-index: 90; height: fit-content;
-}
+.sidebar-sticky { position: -webkit-sticky; position: sticky; top: 90px; z-index: 90; height: fit-content; }
 
 /* =========================================
    8. CARDS
@@ -223,8 +228,7 @@ a:hover { color: var(--primary-hover); }
     position: relative;
 }
 .class-card:hover {
-    transform: translateY(-3px); box-shadow: var(--shadow-md);
-    border-color: var(--primary-color);
+    transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary-color);
 }
 .class-price { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); }
 
@@ -244,58 +248,13 @@ a:hover { color: var(--primary-hover); }
 .tutor-link:hover .tutor-name { color: var(--primary-color); text-decoration: underline; }
 
 /* =========================================
-   9. PROFILE & DETAIL PAGES
-   ========================================= */
-.card-detail {
-    background: #fff; padding: 25px; border-radius: 12px;
-    border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
-    margin-bottom: 20px;
-}
-.section-title { font-weight: 700; color: var(--text-main); margin-bottom: 20px; font-size: 1.1rem; }
-
-.tutor-header-card { background: #fff; border-radius: 12px; box-shadow: var(--shadow-sm); overflow: hidden; }
-.tutor-cover { height: 120px; background: linear-gradient(135deg, var(--primary-color), #388e3c); }
-.tutor-avatar-container { margin-top: -60px; margin-left: 30px; position: relative; display: inline-block; }
-.tutor-avatar-img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; background: #fff; }
-.tutor-initials { 
-    width: 120px; height: 120px; border-radius: 50%; border: 4px solid #fff; 
-    background: var(--primary-light); display: flex; align-items: center; justify-content: center; 
-    font-size: 40px; font-weight: bold; color: var(--primary-text); 
-}
-
-.info-box { background: #fff; border-radius: 8px; border: 1px solid var(--border-color); padding: 20px; margin-bottom: 20px; }
-.info-label { font-weight: 600; color: var(--text-light); font-size: 0.9rem; margin-bottom: 4px; }
-.info-value { color: var(--text-main); font-weight: 500; }
-.info-list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
-
-.proof-img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid var(--border-color); }
-.proof-img:hover { transform: scale(1.05); border-color: var(--primary-color); }
-
-.profile-avatar-box { width: 100px; height: 100px; position: relative; margin: 0 auto 1rem auto; }
-.profile-avatar-circle {
-    width: 100%; height: 100%; background-color: var(--primary-light); color: var(--primary-text); 
-    font-size: 40px; font-weight: bold; display: flex; align-items: center; justify-content: center;
-    border-radius: 50%; border: 4px solid #fff; box-shadow: var(--shadow-sm);
-}
-.profile-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 4px solid #fff; box-shadow: var(--shadow-sm); }
-.btn-upload-icon {
-    position: absolute; bottom: 0; right: 0; background: #fff; border: 1px solid var(--border-color); border-radius: 50%; 
-    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; 
-    color: var(--text-light); transition: all 0.2s ease; box-shadow: var(--shadow-sm);
-}
-.btn-upload-icon:hover { background: var(--primary-color); color: var(--white); border-color: var(--primary-color); }
-
-.alert-floating { position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; animation: slideIn 0.5s ease; box-shadow: var(--shadow-md); }
-@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
-/* =========================================
-   10. BOOTSTRAP OVERRIDES (FIX MÀU XANH DƯƠNG -> XANH LÁ)
+   9. BOOTSTRAP OVERRIDES (FIX MÀU XANH DƯƠNG -> XANH LÁ)
    ========================================= */
 
 /* 1. Nav Pills (Tab Đăng nhập / Đăng ký) */
 .nav-pills .nav-link.active, 
 .nav-pills .show > .nav-link {
-    background-color: var(--primary-color) !important; /* Xanh lá đậm */
+    background-color: var(--primary-color) !important; 
     color: var(--white) !important;
     border-color: var(--primary-color);
 }
@@ -308,22 +267,23 @@ a:hover { color: var(--primary-hover); }
     background-color: var(--primary-light);
 }
 
-/* 2. Ép màu bg-info (Màu xanh dương nhạt) thành Xanh lá nhạt hơn */
-.bg-info {
-    background-color: #4caf50 !important; /* Xanh lá tươi hơn */
-    color: var(--white) !important;
+/* 2. Text Primary (Thay thế màu xanh dương mặc định) */
+.text-primary {
+    color: var(--primary-color) !important;
 }
 
-/* 3. Avatar tròn màu xanh (đôi khi bootstrap mặc định màu khác) */
-.avatar-circle {
-    width: 100px; height: 100px; 
-    border-radius: 50%; 
-    background-color: var(--primary-color); /* Xanh lá */
-    color: #fff; 
-    font-size: 40px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    font-weight: bold;
-    text-transform: uppercase;
+/* 3. Button Primary (Đè nút mặc định của Bootstrap) */
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+.btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+    background-color: var(--primary-hover) !important;
+    border-color: var(--primary-hover) !important;
+}
+
+/* 4. Background Info (Ép bg-info thành xanh lá nhạt hơn) */
+.bg-info {
+    background-color: #2e7d32 !important; 
+    color: var(--white) !important;
 }

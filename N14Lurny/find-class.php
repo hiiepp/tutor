@@ -8,27 +8,22 @@ $subject = isset($_GET['subject']) ? $_GET['subject'] : '';
 $method = isset($_GET['method']) ? $_GET['method'] : '';
 $location = isset($_GET['location']) ? $_GET['location'] : '';
 
-// --- 1. XỬ LÝ LỌC GIÁ (Mới cập nhật) ---
-// Hàm hỗ trợ xóa dấu phẩy để lấy số nguyên
-function clean_number($str) {
-    return str_replace(',', '', $str);
-}
-
-// Lấy giá trị raw từ URL (có thể chứa dấu phẩy)
+// --- XỬ LÝ LỌC GIÁ ---
+function clean_number($str) { return str_replace(',', '', $str); }
 $raw_min = isset($_GET['min_price']) ? clean_number($_GET['min_price']) : '';
 $raw_max = isset($_GET['max_price']) ? clean_number($_GET['max_price']) : '';
-
-// Chuyển thành số nguyên để query database
 $min_price = (is_numeric($raw_min)) ? intval($raw_min) : '';
 $max_price = (is_numeric($raw_max)) ? intval($raw_max) : '';
 
-// SQL Query cơ bản
+// --- 1. NHẬN DỮ LIỆU NGÀY (MỚI) ---
+$filter_start = isset($_GET['filter_start']) ? $_GET['filter_start'] : '';
+$filter_end = isset($_GET['filter_end']) ? $_GET['filter_end'] : '';
+
 $sql = "SELECT classes.*, users.full_name, users.avatar 
         FROM classes 
         LEFT JOIN users ON classes.tutor_id = users.id 
         WHERE classes.status = 'active'";
 
-// ... (Các điều kiện lọc khác giữ nguyên) ...
 if (!empty($keyword)) {
     $e_keyword = $conn->real_escape_string($keyword);
     $sql .= " AND (classes.title LIKE '%$e_keyword%' OR classes.subject LIKE '%$e_keyword%')";
@@ -49,8 +44,6 @@ if (!empty($location) && $location !== 'Tất cả') {
     $e_location = $conn->real_escape_string($location);
     $sql .= " AND classes.location LIKE '%$e_location%'";
 }
-
-// Thêm điều kiện giá vào SQL
 if ($min_price !== '') {
     $sql .= " AND CAST(classes.price AS UNSIGNED) >= $min_price";
 }
@@ -58,11 +51,20 @@ if ($max_price !== '') {
     $sql .= " AND CAST(classes.price AS UNSIGNED) <= $max_price";
 }
 
+// --- 2. THÊM ĐIỀU KIỆN LỌC NGÀY VÀO SQL (MỚI) ---
+if (!empty($filter_start)) {
+    // Tìm các lớp bắt đầu từ ngày này trở đi
+    $sql .= " AND classes.start_date >= '$filter_start'";
+}
+if (!empty($filter_end)) {
+    // Tìm các lớp kết thúc trước hoặc trong ngày này
+    $sql .= " AND classes.end_date <= '$filter_end'";
+}
+
 $sql .= " ORDER BY classes.id DESC";
 
 $error_message = "";
 $result = null;
-
 try {
     $result = $conn->query($sql);
 } catch (Exception $e) {
@@ -96,17 +98,10 @@ try {
 <section class="search-header">
   <div class="container">
     <h4 class="text-center fw-bold mb-3 text-brand">Tìm gia sư giỏi, lớp học phù hợp</h4>
-    
     <form action="find-class.php" method="GET">
         <div class="search-container mx-auto">
             <i class="bi bi-search text-muted ps-3"></i>
-            <input 
-                type="text" 
-                name="keyword" 
-                class="search-input" 
-                value="<?php echo htmlspecialchars($keyword); ?>"
-                placeholder="Tìm môn học, lớp, tên gia sư..."
-            >
+            <input type="text" name="keyword" class="search-input" value="<?php echo htmlspecialchars($keyword); ?>" placeholder="Tìm môn học, lớp, tên gia sư...">
             <button type="submit" class="btn btn-brand search-btn">Tìm kiếm</button>
         </div>
     </form>
@@ -131,21 +126,21 @@ try {
                   <div class="mb-3">
                       <label class="form-label small fw-bold text-secondary">Mức phí (VNĐ)</label>
                       <div class="d-flex gap-2 align-items-center">
-                          <input 
-                            type="text" 
-                            name="min_price" 
-                            class="form-control form-control-sm price-input" 
-                            placeholder="Từ" 
-                            value="<?php echo ($min_price !== '') ? number_format($min_price) : ''; ?>"
-                          >
+                          <input type="text" name="min_price" class="form-control form-control-sm price-input" placeholder="Từ" value="<?php echo ($min_price !== '') ? number_format($min_price) : ''; ?>">
                           <span class="text-muted">-</span>
-                          <input 
-                            type="text" 
-                            name="max_price" 
-                            class="form-control form-control-sm price-input" 
-                            placeholder="Đến" 
-                            value="<?php echo ($max_price !== '') ? number_format($max_price) : ''; ?>"
-                          >
+                          <input type="text" name="max_price" class="form-control form-control-sm price-input" placeholder="Đến" value="<?php echo ($max_price !== '') ? number_format($max_price) : ''; ?>">
+                      </div>
+                  </div>
+
+                  <div class="mb-3">
+                      <label class="form-label small fw-bold text-secondary">Thời gian học</label>
+                      <div class="mb-2">
+                          <small class="text-muted d-block mb-1">Ngày bắt đầu từ:</small>
+                          <input type="date" name="filter_start" class="form-control form-control-sm" value="<?= $filter_start ?>">
+                      </div>
+                      <div>
+                          <small class="text-muted d-block mb-1">Kết thúc trước:</small>
+                          <input type="date" name="filter_end" class="form-control form-control-sm" value="<?= $filter_end ?>">
                       </div>
                   </div>
 
@@ -191,7 +186,8 @@ try {
                       </select>
                   </div>
 
-                  <button type="submit" class="btn btn-brand w-100 fw-bold">Áp dụng</button>
+                  <button type="submit" class="btn btn-brand w-100 fw-bold mb-2">Áp dụng</button>
+                  <a href="find-class.php" class="btn btn-outline-secondary w-100 fw-bold"><i class="bi bi-list-ul me-2"></i>Xem tất cả</a>
                 </form>
             </div>
         </div>
@@ -216,6 +212,12 @@ try {
                 $tutor_link = "student/tutor_profile.php?id=" . $row['tutor_id'];
                 $has_avatar = !empty($row['avatar']) && file_exists("assets/uploads/avatars/" . $row['avatar']);
                 $avatar_src = $has_avatar ? "assets/uploads/avatars/" . $row['avatar'] : "";
+
+                // 4. XỬ LÝ NGÀY THÁNG ĐỂ HIỂN THỊ (MỚI)
+                $date_display = "Chưa cập nhật";
+                if (!empty($row['start_date']) && !empty($row['end_date'])) {
+                    $date_display = date('d/m/Y', strtotime($row['start_date'])) . ' - ' . date('d/m/Y', strtotime($row['end_date']));
+                }
             ?>
                 <div class="col-md-12">
                     <div class="class-card">
@@ -234,7 +236,8 @@ try {
                                 </div>
                                 <div class="d-flex flex-wrap gap-3 text-secondary small">
                                     <div class="d-flex align-items-center"><i class="bi bi-mortarboard me-2 text-brand"></i> <?= htmlspecialchars($row['grade']) ?></div>
-                                    <div class="d-flex align-items-center"><i class="bi bi-geo-alt me-2 text-brand"></i> <span class="text-truncate" style="max-width: 250px;"><?= htmlspecialchars($row['location']) ?></span></div>
+                                    <div class="d-flex align-items-center"><i class="bi bi-geo-alt me-2 text-brand"></i> <span class="text-truncate" style="max-width: 150px;"><?= htmlspecialchars($row['location']) ?></span></div>
+                                    <div class="d-flex align-items-center"><i class="bi bi-calendar-range me-2 text-brand"></i> <?= $date_display ?></div>
                                 </div>
                             </div>
                             <div class="col-md-4 text-md-end mt-3 mt-md-0 border-start-md ps-md-4 d-flex flex-column justify-content-center align-items-md-end align-items-start">
@@ -265,18 +268,10 @@ try {
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const priceInputs = document.querySelectorAll('.price-input');
-
     priceInputs.forEach(input => {
         input.addEventListener('input', function(e) {
-            // Lấy giá trị hiện tại và chỉ giữ lại số
             let value = e.target.value.replace(/[^0-9]/g, '');
-            
-            // Nếu có giá trị, định dạng lại theo kiểu Mỹ (có dấu phẩy)
-            if (value) {
-                value = parseInt(value).toLocaleString('en-US');
-            }
-            
-            // Gán lại giá trị đã format vào ô input
+            if (value) { value = parseInt(value).toLocaleString('en-US'); }
             e.target.value = value;
         });
     });

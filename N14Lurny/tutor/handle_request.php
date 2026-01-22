@@ -20,7 +20,7 @@ if ($registration_id == 0 || $class_id == 0 || !in_array($action, ['accept', 're
     die("Dữ liệu không hợp lệ.");
 }
 
-// 1. Kiểm tra quyền sở hữu & Lấy tiêu đề lớp (để ghi vào thông báo)
+// 1. Kiểm tra quyền sở hữu & Lấy thông tin lớp
 $check_owner = $conn->prepare("SELECT id, title, max_students FROM classes WHERE id = ? AND tutor_id = ?");
 $check_owner->bind_param("ii", $class_id, $tutor_id);
 $check_owner->execute();
@@ -32,35 +32,39 @@ if ($res_owner->num_rows == 0) {
 
 $class_info = $res_owner->fetch_assoc();
 $max_students = $class_info['max_students'];
-$class_title = $class_info['title']; // Lấy tên lớp
+$class_title = $class_info['title']; 
 
-// 2. Lấy ID học sinh từ đơn đăng ký (để biết gửi thông báo cho ai)
+// 2. Lấy ID học viên từ đơn đăng ký
 $get_student = $conn->prepare("SELECT student_id FROM class_registrations WHERE id = ?");
 $get_student->bind_param("i", $registration_id);
 $get_student->execute();
 $student_info = $get_student->get_result()->fetch_assoc();
 $student_id = $student_info['student_id'] ?? 0;
 
+// --- XỬ LÝ TỪ CHỐI ---
 if ($action == 'reject') {
     $stmt = $conn->prepare("UPDATE class_registrations SET status = 'rejected' WHERE id = ?");
     $stmt->bind_param("i", $registration_id);
     if ($stmt->execute()) {
         $_SESSION['message'] = "Đã từ chối học viên.";
         
-        // --- GỬI THÔNG BÁO TỪ CHỐI ---
+        // GỬI THÔNG BÁO CHO HỌC VIÊN
         if ($student_id > 0) {
             $notif_title = "Đăng ký bị từ chối ❌";
-            $notif_msg = "Gia sư đã từ chối yêu cầu tham gia lớp: " . $class_title;
+            $notif_msg = "Gia sư đã từ chối yêu cầu tham gia lớp: <strong>" . $class_title . "</strong>";
+            // Link dẫn về trang chi tiết lớp (ở thư mục gốc)
             $notif_link = "class-detail.php?id=" . $class_id;
             
-            $n_stmt = $conn->prepare("INSERT INTO notifications (user_id, title, message, link, created_at) VALUES (?, ?, ?, ?, NOW())");
+            $n_stmt = $conn->prepare("INSERT INTO notifications (user_id, title, message, link, is_read, created_at) VALUES (?, ?, ?, ?, 0, NOW())");
             $n_stmt->bind_param("isss", $student_id, $notif_title, $notif_msg, $notif_link);
             $n_stmt->execute();
         }
     }
 } 
+// --- XỬ LÝ CHẤP NHẬN ---
 elseif ($action == 'accept') {
     
+    // Kiểm tra sĩ số
     $count_sql = "SELECT COUNT(*) as total FROM class_registrations WHERE class_id = ? AND status = 'accepted'";
     $stmt_count = $conn->prepare($count_sql);
     $stmt_count->bind_param("i", $class_id);
@@ -77,26 +81,27 @@ elseif ($action == 'accept') {
     if ($stmt->execute()) {
         $_SESSION['message'] = "Đã duyệt học viên thành công!";
         
-        // --- GỬI THÔNG BÁO CHẤP NHẬN ---
+        // GỬI THÔNG BÁO CHO HỌC VIÊN
         if ($student_id > 0) {
             $notif_title = "Đăng ký thành công! ✅";
-            $notif_msg = "Chúc mừng! Gia sư đã duyệt bạn vào lớp: " . $class_title . ". Xem chi tiết để lấy SĐT liên hệ.";
+            $notif_msg = "Chúc mừng! Gia sư đã duyệt bạn vào lớp: <strong>" . $class_title . "</strong>. Nhấn vào đây để xem thông tin liên hệ.";
+            // Link dẫn về trang chi tiết lớp (ở thư mục gốc)
             $notif_link = "class-detail.php?id=" . $class_id;
             
-            $n_stmt = $conn->prepare("INSERT INTO notifications (user_id, title, message, link, created_at) VALUES (?, ?, ?, ?, NOW())");
+            $n_stmt = $conn->prepare("INSERT INTO notifications (user_id, title, message, link, is_read, created_at) VALUES (?, ?, ?, ?, 0, NOW())");
             $n_stmt->bind_param("isss", $student_id, $notif_title, $notif_msg, $notif_link);
             $n_stmt->execute();
         }
 
-        // Kiểm tra đóng lớp nếu đầy
+        // Tự động đóng lớp nếu đầy
         $stmt_count->execute();
         $new_total = $stmt_count->get_result()->fetch_assoc()['total'];
 
         if ($new_total >= $max_students) {
-            $stmt_close = $conn->prepare("UPDATE classes SET status = 'hidden' WHERE id = ?");
+            $stmt_close = $conn->prepare("UPDATE classes SET status = 'closed' WHERE id = ?");
             $stmt_close->bind_param("i", $class_id);
             $stmt_close->execute();
-            $_SESSION['message'] .= " Lớp đã đủ học viên và tự động đóng.";
+            $_SESSION['message'] .= " (Lớp đã đủ học viên và tự động khóa sổ).";
         }
     }
 }

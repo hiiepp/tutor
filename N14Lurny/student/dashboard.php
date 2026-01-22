@@ -1,16 +1,20 @@
 <?php
 session_start();
-include '../includes/header.php'; // Đảm bảo include đúng header của student hoặc chung
+include '../includes/header.php'; 
 require_once '../config/db.php';
+
+// Thiết lập múi giờ
+date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
     header("Location: ../auth/login_register.php"); exit();
 }
 
 $student_id = $_SESSION['user_id'];
+$today = date('Y-m-d');
 
-// Truy vấn các lớp đã đăng ký
-$sql = "SELECT r.*, c.title, c.subject, c.price, c.method, c.location, u.full_name as tutor_name
+// Truy vấn các lớp đã đăng ký (THÊM c.start_date VÀO SQL)
+$sql = "SELECT r.*, c.title, c.subject, c.price, c.method, c.location, c.start_date, c.end_date, u.full_name as tutor_name
         FROM class_registrations r
         JOIN classes c ON r.class_id = c.id
         JOIN users u ON c.tutor_id = u.id
@@ -66,24 +70,48 @@ $result = $stmt->get_result();
                         <div class="class-tags">
                             <span><?= htmlspecialchars($row['subject']) ?></span>
                             <span><?= htmlspecialchars($row['method']) ?></span>
-                            <span class="text-truncate" style="max-width: 150px; vertical-align: bottom;">
-                                <?= htmlspecialchars($row['location']) ?>
-                            </span>
+                        </div>
+                        
+                        <div class="small text-muted mb-1">
+                            <i class="bi bi-geo-alt me-1"></i> <?= htmlspecialchars($row['location']) ?>
+                        </div>
+                        
+                        <div class="small text-muted">
+                            <i class="bi bi-calendar-range me-1"></i>
+                            <?php 
+                                if (!empty($row['start_date']) && !empty($row['end_date'])) {
+                                    echo date('d/m/Y', strtotime($row['start_date'])) . ' - ' . date('d/m/Y', strtotime($row['end_date']));
+                                } else {
+                                    echo "Chưa cập nhật thời gian";
+                                }
+                            ?>
                         </div>
                     </div>
 
-                    <div class="card-section card-section-last d-flex justify-content-between align-items-center pt-3">
-                        <?php if($row['status'] == 'pending'): ?>
-                            <span class="badge bg-warning text-dark">Chờ duyệt</span>
-                        <?php elseif($row['status'] == 'accepted'): ?>
-                            <span class="badge bg-success">Đã được nhận</span>
-                        <?php else: ?>
-                            <span class="badge bg-danger">Bị từ chối</span>
-                        <?php endif; ?>
+                    <div class="card-section card-section-last pt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <?php if($row['status'] == 'pending'): ?>
+                                <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                            <?php elseif($row['status'] == 'accepted'): ?>
+                                <span class="badge bg-success">Đã được nhận</span>
+                            <?php else: ?>
+                                <span class="badge bg-danger">Bị từ chối</span>
+                            <?php endif; ?>
 
-                        <a href="../class-detail.php?id=<?= $row['class_id'] ?>" class="btn btn-outline-secondary btn-sm">
-                           Xem chi tiết
-                        </a>
+                            <a href="../class-detail.php?id=<?= $row['class_id'] ?>" class="btn btn-outline-secondary btn-sm">
+                               Xem chi tiết
+                            </a>
+                        </div>
+
+                        <?php 
+                            if($row['status'] == 'accepted' && !empty($row['start_date']) && $today >= $row['start_date']):
+                        ?>
+                            <div class="mt-2 text-end">
+                                <a href="../class-detail.php?id=<?= $row['class_id'] ?>" class="text-danger small text-decoration-none fw-bold">
+                                    <i class="bi bi-flag-fill"></i> Báo cáo vấn đề
+                                </a>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                 </div>
@@ -102,9 +130,7 @@ $result = $stmt->get_result();
 </section>
 
 <?php include '../includes/footer.php'; ?>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 
 </body>
 </html>

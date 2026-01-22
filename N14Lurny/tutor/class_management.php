@@ -29,44 +29,54 @@ $result = $stmt->get_result();
 $list_pending = [];   
 $list_upcoming = [];  
 $list_ongoing = [];   
+$list_finished = []; 
 $list_hidden = [];    
 $list_rejected = [];  
 
 while ($row = $result->fetch_assoc()) {
     $has_students = ($row['accepted_count'] > 0);
+    
+    // Ngày bắt đầu <= hôm nay => Đã bắt đầu
     $is_started = (!empty($row['start_date']) && $row['start_date'] <= $today);
+    
+    // Ngày kết thúc < hôm nay => Đã kết thúc
+    $is_finished = (!empty($row['end_date']) && $row['end_date'] < $today);
+    
+    // Quá hạn tuyển sinh (Start date < hôm nay) nhưng chưa có HS
+    $is_expired_enroll = (!empty($row['start_date']) && $row['start_date'] < $today);
 
-    // --- TỰ ĐỘNG KHÓA LỚP QUÁ HẠN KHÔNG CÓ HỌC VIÊN ---
-    // Nếu: Đang mở (active) VÀ Đã đến ngày (is_started) VÀ Không có học viên (!has_students)
-    if ($row['status'] == 'active' && $is_started && !$has_students) {
-        // 1. Cập nhật Database thành 'closed'
+    // --- LOGIC 1: TỰ ĐỘNG KHÓA LỚP QUÁ HẠN KHÔNG CÓ HỌC VIÊN ---
+    if ($row['status'] == 'active' && $is_expired_enroll && !$has_students) {
         $update_id = $row['id'];
         $conn->query("UPDATE classes SET status = 'closed' WHERE id = $update_id");
-        
-        // 2. Cập nhật biến $row để xếp loại đúng vào tab Đang ẩn ngay bây giờ
         $row['status'] = 'closed';
     }
     // ----------------------------------------------------
 
+    // PHÂN LOẠI VÀO CÁC MẢNG
     if ($row['status'] == 'pending') {
         $list_pending[] = $row;
     } 
     elseif ($row['status'] == 'rejected') {
         $list_rejected[] = $row;
     }
-    elseif ($row['status'] == 'hidden' || $row['status'] == 'closed') {
-        if ($has_students) {
-            // Nếu đã có học viên thì vẫn hiện ở tab Dạy
-            if ($is_started) $list_ongoing[] = $row;
-            else $list_upcoming[] = $row;
-        } else {
-            // Nếu không có học viên -> Vào tab Đang ẩn
-            $list_hidden[] = $row;
+    else {
+        // Các trạng thái: active, hidden, closed
+        
+        // --- CẬP NHẬT LOGIC: Phải qua ngày kết thúc VÀ có học viên mới vào Lịch sử ---
+        if ($is_finished && $has_students) {
+            $list_finished[] = $row;
+        } 
+        elseif ($has_students) {
+            // Có học viên và chưa kết thúc
+            if ($is_started) $list_ongoing[] = $row; // Đang dạy
+            else $list_upcoming[] = $row;            // Chờ dạy
+        } 
+        else {
+            // Chưa có học viên (Bao gồm cả lớp active chưa ai đăng ký và lớp closed do quá hạn)
+            if ($row['status'] == 'active') $list_upcoming[] = $row; // Đang tuyển
+            else $list_hidden[] = $row; // Đang ẩn/đóng
         }
-    } 
-    elseif ($row['status'] == 'active') {
-        if ($has_students && $is_started) $list_ongoing[] = $row;
-        else $list_upcoming[] = $row;
     }
 }
 
@@ -82,28 +92,47 @@ function renderClassCard($row, $type) {
     $max = $row['max_students'] ?? 1;
     $current = $row['accepted_count'];
     $is_full = ($current >= $max);
+    
     $is_started = (!empty($row['start_date']) && $row['start_date'] <= $today);
     $db_status = $row['status'];
     $has_students = ($current > 0);
 
-    // Logic Xóa: Khóa nút xóa nếu có học viên
+    // Logic khóa nút
     $can_delete = !$has_students;
+    $disable_edit = ($is_started && $has_students) || $type == 'finished' || $type == 'rejected';
 
     $status_label = '';
     $border_class = 'border-0';
     $opacity = '';
 
-    if ($type == 'pending') {
+    // --- CẤU HÌNH GIAO DIỆN THEO LOẠI ---
+    if ($type == 'finished') {
+        $status_label = '<span class="badge bg-secondary"><i class="bi bi-flag-fill"></i> Đã kết thúc</span>';
+        $opacity = 'opacity-75 bg-light'; 
+        $border_class = 'border-secondary border-start border-4';
+    } 
+    elseif ($type == 'pending') {
         $status_label = '<span class="badge bg-warning text-dark">⏳ Chờ Admin duyệt</span>';
-    } elseif ($type == 'rejected') {
+    } 
+    elseif ($type == 'rejected') {
         $status_label = '<span class="badge bg-danger">🚫 Bị từ chối</span>';
         $opacity = 'opacity-75';
-    } elseif ($type == 'hidden') {
-        // Thêm label giải thích lý do ẩn
-        $reason = ($db_status == 'closed' && !$has_students) ? "(Quá hạn tuyển)" : "(Chưa có HV)";
+    } 
+    elseif ($type == 'hidden') {
+        // Logic hiển thị lý do ẩn
+        $reason = "";
+        if ($db_status == 'closed') {
+            if (!$has_students) $reason = "(Quá hạn & Không có HV)";
+            else $reason = "(Đã đóng)";
+        } else {
+            $reason = "(Đang ẩn)";
+        }
+        
         $status_label = '<span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> Đã khóa ' . $reason . '</span>';
         $opacity = 'opacity-75 bg-light';
-    } else {
+    } 
+    else {
+        // Upcoming hoặc Ongoing
         if ($db_status == 'hidden' || $db_status == 'closed') {
             $status_label = '<span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> Đã khóa sổ</span>';
         } else {
@@ -114,7 +143,7 @@ function renderClassCard($row, $type) {
         else $border_class = 'border-primary border-start border-4';
     }
 
-    if ($is_full && $type != 'rejected' && $db_status != 'hidden') {
+    if ($is_full && $type != 'rejected' && $db_status != 'hidden' && $type != 'finished') {
         $status_label .= ' <span class="badge bg-danger ms-1">Đã đủ HV</span>';
     }
     ?>
@@ -159,7 +188,7 @@ function renderClassCard($row, $type) {
                                 <i class="bi bi-eye"></i>
                             </a>
                             
-                            <?php if ($is_started || $is_full || $type == 'rejected'): ?>
+                            <?php if ($disable_edit): ?>
                                 <button class="btn btn-light btn-sm px-3 border disabled" title="Không thể sửa">
                                     <i class="bi bi-pencil text-muted"></i>
                                 </button>
@@ -169,24 +198,26 @@ function renderClassCard($row, $type) {
                                 </a>
                             <?php endif; ?>
 
-                            <?php if ($db_status == 'active'): ?>
-                                <a href="update_status.php?id=<?= $row['id'] ?>&action=close" 
-                                   class="btn btn-warning btn-sm px-3 text-dark border" 
-                                   onclick="return confirm('Khóa lớp này?')" 
-                                   title="Khóa lớp">
-                                    <i class="bi bi-lock-fill"></i>
-                                </a>
-                            <?php elseif ($db_status == 'hidden' || $db_status == 'closed'): ?>
-                                <?php if ($is_full): ?>
-                                    <button class="btn btn-secondary btn-sm px-3 border" disabled title="Lớp đã đủ học viên">
-                                        <i class="bi bi-unlock"></i>
-                                    </button>
-                                <?php else: ?>
-                                    <a href="update_status.php?id=<?= $row['id'] ?>&action=open" 
-                                       class="btn btn-success btn-sm px-3 border" 
-                                       title="Mở lại lớp">
-                                        <i class="bi bi-unlock-fill"></i>
+                            <?php if($type != 'finished' && $type != 'rejected' && $type != 'pending'): ?>
+                                <?php if ($db_status == 'active'): ?>
+                                    <a href="update_status.php?id=<?= $row['id'] ?>&action=close" 
+                                       class="btn btn-warning btn-sm px-3 text-dark border" 
+                                       onclick="return confirm('Khóa lớp này?')" 
+                                       title="Khóa lớp">
+                                        <i class="bi bi-lock-fill"></i>
                                     </a>
+                                <?php elseif ($db_status == 'hidden' || $db_status == 'closed'): ?>
+                                    <?php if ($is_full): ?>
+                                        <button class="btn btn-secondary btn-sm px-3 border" disabled title="Lớp đã đủ học viên">
+                                            <i class="bi bi-unlock"></i>
+                                        </button>
+                                    <?php else: ?>
+                                        <a href="update_status.php?id=<?= $row['id'] ?>&action=open" 
+                                           class="btn btn-success btn-sm px-3 border" 
+                                           title="Mở lại lớp">
+                                            <i class="bi bi-unlock-fill"></i>
+                                        </a>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             <?php endif; ?>
 
@@ -251,6 +282,13 @@ function renderClassCard($row, $type) {
                 Đang dạy (<?= count($list_ongoing) ?>)
             </button>
         </li>
+        
+        <li class="nav-item">
+            <button class="nav-link" id="finished-tab" data-bs-toggle="tab" data-bs-target="#finished" type="button">
+                Lịch sử (<?= count($list_finished) ?>)
+            </button>
+        </li>
+
         <li class="nav-item">
             <button class="nav-link" id="hidden-tab" data-bs-toggle="tab" data-bs-target="#hidden" type="button">
                 Đang ẩn (<?= count($list_hidden) ?>)
@@ -287,6 +325,19 @@ function renderClassCard($row, $type) {
                 <div class="empty-state">
                     <i class="bi bi-mortarboard fs-1 mb-2"></i>
                     <p>Chưa có lớp nào đang diễn ra.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="tab-pane fade" id="finished" role="tabpanel">
+            <?php if(count($list_finished) > 0): ?>
+                <div class="row">
+                    <?php foreach($list_finished as $class) renderClassCard($class, 'finished'); ?>
+                </div>
+            <?php else: ?>
+                <div class="empty-state">
+                    <i class="bi bi-check2-circle fs-1 mb-2"></i>
+                    <p>Chưa có lớp học nào đã hoàn thành.</p>
                 </div>
             <?php endif; ?>
         </div>
