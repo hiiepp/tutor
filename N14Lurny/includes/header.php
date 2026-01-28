@@ -49,6 +49,9 @@ if (isset($_SESSION['user_id'])) {
         <li class="nav-item">
             <a class="nav-link" href="<?= $base_url ?>/find-class.php">Tìm lớp học</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/N14Lurny/find-tutor.php">Tìm Gia Sư</a>
+        </li>
       </ul>
 
       <div class="d-flex align-items-center">

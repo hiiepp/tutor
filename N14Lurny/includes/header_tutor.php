@@ -150,6 +150,11 @@ if (isset($_SESSION['user_id'])) {
                         </a>
                     </li>
                     <li>
+                        <a class="dropdown-item py-2" href="<?= $base_url ?>/tutor/my_reviews.php">
+                            <i class="bi bi-star-fill me-2 text-warning"></i> Đánh giá của tôi
+                        </a>
+                    </li>
+                    <li>
                         <a class="dropdown-item py-2" href="<?= $base_url ?>/tutor/class_management.php">
                             <i class="bi bi-collection-fill me-2 text-success"></i> Quản lý lớp học
                         </a>

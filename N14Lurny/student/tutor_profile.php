@@ -47,8 +47,17 @@ $proofs_res = $conn->query("SELECT * FROM tutor_proofs WHERE user_id = $tutor_id
 $classes_res = $conn->query("SELECT * FROM classes WHERE tutor_id = $tutor_id AND status = 'active' ORDER BY created_at DESC");
 $count_active = $classes_res->num_rows;
 
-// 5. Thống kê tổng số lớp đã dạy (để tăng uy tín)
+// 5. Thống kê tổng số lớp đã dạy
 $count_all = $conn->query("SELECT COUNT(*) as total FROM classes WHERE tutor_id = $tutor_id")->fetch_assoc()['total'];
+
+// 6. LẤY DANH SÁCH ĐÁNH GIÁ (MỚI THÊM)
+$reviews_sql = "SELECT r.*, s.full_name as student_name, s.avatar as s_avatar, c.title as class_title 
+                FROM reviews r 
+                JOIN users s ON r.student_id = s.id 
+                JOIN classes c ON r.class_id = c.id 
+                WHERE r.tutor_id = $tutor_id 
+                ORDER BY r.created_at DESC";
+$reviews_res = $conn->query($reviews_sql);
 ?>
 
 <!DOCTYPE html>
@@ -75,6 +84,11 @@ $count_all = $conn->query("SELECT COUNT(*) as total FROM classes WHERE tutor_id 
 
         .class-mini-card { border: 1px solid #e9ecef; border-radius: 8px; transition: 0.2s; background: #fff; }
         .class-mini-card:hover { border-color: #198754; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+        /* Style cho phần đánh giá */
+        .review-item { border-bottom: 1px dashed #e9ecef; padding-bottom: 15px; margin-bottom: 15px; }
+        .review-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .student-avatar-sm { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #f8f9fa; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #555; border: 1px solid #dee2e6; }
     </style>
 </head>
 <body class="bg-light">
@@ -112,18 +126,16 @@ $count_all = $conn->query("SELECT COUNT(*) as total FROM classes WHERE tutor_id 
                             <div class="fw-bold fs-5 text-success"><?= $count_active ?></div>
                             <div class="small text-muted">Đang mở</div>
                         </div>
+                        <div class="px-3 border-start">
+                            <div class="fw-bold fs-5 text-warning">
+                                <?= ($tutor['avg_rating'] > 0) ? $tutor['avg_rating'] : '0.0' ?> <i class="bi bi-star-fill fs-6"></i>
+                            </div>
+                            <div class="small text-muted"><?= $tutor['review_count'] ?> đánh giá</div>
+                        </div>
                     </div>
                 </div>
                 <div class="px-4 pb-4">
                     <h2 class="fw-bold text-dark mb-1"><?= htmlspecialchars($tutor['full_name']) ?></h2>
-                    <div class="text-warning mb-3">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <span class="text-muted small ms-2">(Gia sư uy tín)</span>
-                    </div>
                     
                     <div class="mt-4">
                         <h6 class="fw-bold text-success"><i class="bi bi-person-lines-fill me-2"></i>Giới thiệu bản thân</h6>
@@ -169,6 +181,53 @@ $count_all = $conn->query("SELECT COUNT(*) as total FROM classes WHERE tutor_id 
                     </div>
                 <?php else: ?>
                     <p class="text-muted fst-italic">Hiện tại gia sư này chưa có lớp nào khác đang mở.</p>
+                <?php endif; ?>
+            </div>
+
+            <div class="info-box shadow-sm border-0">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-success m-0"><i class="bi bi-chat-square-quote-fill me-2"></i>Đánh giá từ Học viên</h6>
+                    <span class="badge bg-light text-dark border"><?= $reviews_res->num_rows ?> đánh giá</span>
+                </div>
+                
+                <?php if($reviews_res->num_rows > 0): ?>
+                    <?php while($rev = $reviews_res->fetch_assoc()): 
+                        $s_avatar = !empty($rev['s_avatar']) ? "../assets/uploads/avatars/" . $rev['s_avatar'] : null;
+                        $s_initial = mb_substr($rev['student_name'], 0, 1);
+                    ?>
+                        <div class="review-item">
+                            <div class="d-flex justify-content-between">
+                                <div class="d-flex align-items-center mb-2">
+                                    <?php if($s_avatar): ?>
+                                        <img src="<?= $s_avatar ?>" class="student-avatar-sm me-2">
+                                    <?php else: ?>
+                                        <div class="student-avatar-sm me-2"><?= $s_initial ?></div>
+                                    <?php endif; ?>
+                                    <div>
+                                        <div class="fw-bold text-dark small"><?= htmlspecialchars($rev['student_name']) ?></div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">Lớp: <?= htmlspecialchars($rev['class_title']) ?></div>
+                                    </div>
+                                </div>
+                                <div class="text-muted small"><?= date('d/m/Y', strtotime($rev['created_at'])) ?></div>
+                            </div>
+
+                            <div class="ms-5">
+                                <div class="mb-1 text-warning small">
+                                    <?php 
+                                    for($i=1; $i<=5; $i++) {
+                                        echo ($i <= $rev['rating']) ? '<i class="bi bi-star-fill"></i> ' : '<i class="bi bi-star text-secondary opacity-25"></i> ';
+                                    }
+                                    ?>
+                                </div>
+                                <p class="mb-0 text-secondary fst-italic small">"<?= nl2br(htmlspecialchars($rev['comment'])) ?>"</p>
+                            </div>
+                        </div>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <div class="text-center py-4">
+                        <i class="bi bi-chat-left-text text-muted fs-2 opacity-25"></i>
+                        <p class="text-muted small mt-2">Chưa có đánh giá nào cho gia sư này.</p>
+                    </div>
                 <?php endif; ?>
             </div>
 
@@ -228,7 +287,6 @@ $count_all = $conn->query("SELECT COUNT(*) as total FROM classes WHERE tutor_id 
   </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 function showImage(src) {

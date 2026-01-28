@@ -117,7 +117,6 @@ $initial = mb_strtoupper(mb_substr($student['full_name'], 0, 1, "UTF-8"));
   </div>
 </section>
 
-<?php include '../includes/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

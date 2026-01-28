@@ -16,7 +16,8 @@ $sql = "SELECT c.*,
                u.email as tutor_email, 
                u.phone as tutor_phone,
                u.avatar as tutor_avatar,
-               u.degree, u.major, u.experience, u.address as tutor_address
+               u.degree, u.major, u.experience, u.address as tutor_address, 
+               u.avg_rating, u.review_count    /* <-- Đã có dấu phẩy ở dòng trên và dòng này */
         FROM classes c 
         LEFT JOIN users u ON c.tutor_id = u.id 
         WHERE c.id = ?";
@@ -158,7 +159,26 @@ $avatar_url = (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avata
                     <?php endif; ?>
                 </a>
                 <h6 class="fw-bold fs-5 mb-1"><?= htmlspecialchars($tutorName) ?></h6>
+
+
                 
+                <div class="mb-3 mt-1">
+                    <?php 
+                        $t_avg = isset($row['avg_rating']) && $row['avg_rating'] > 0 ? $row['avg_rating'] : 0;
+                        $t_count = isset($row['review_count']) && $row['review_count'] > 0 ? $row['review_count'] : 0;
+                    ?>
+                    <?php if($t_count > 0): ?>
+                        <div class="d-flex justify-content-center align-items-center text-warning gap-1">
+                            <span class="fw-bold fs-5"><?= $t_avg ?></span> 
+                            <i class="bi bi-star-fill fs-6"></i>
+                            <span class="text-muted small ms-1" style="font-weight: 500;">(<?= $t_count ?> đánh giá)</span>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-muted small fst-italic">
+                            <i class="bi bi-star me-1"></i> Chưa có đánh giá
+                        </div>
+                    <?php endif; ?>
+                </div>
                 <div class="text-start bg-light p-3 rounded mb-3 mt-3 small">
                     <div class="mb-2"><i class="bi bi-mortarboard-fill text-muted me-2"></i><strong>Trình độ:</strong> <?= htmlspecialchars($row['degree'] ?? 'Chưa cập nhật') ?></div>
                     <div class="mb-2"><i class="bi bi-book-half text-muted me-2"></i><strong>Chuyên ngành:</strong> <?= htmlspecialchars($row['major'] ?? 'Chưa cập nhật') ?></div>
@@ -176,6 +196,25 @@ $avatar_url = (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avata
                         <a href="tel:<?= htmlspecialchars($row['tutor_phone']) ?>" class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-telephone"></i> <?= htmlspecialchars($row['tutor_phone'] ?? 'Chưa cập nhật SĐT') ?>
                         </a>
+
+                        <?php 
+                            // Kiểm tra xem đã đánh giá chưa
+                            $has_reviewed = false;
+                            if(isset($_SESSION['user_id'])) {
+                                $chk_rev = $conn->query("SELECT id FROM reviews WHERE class_id = $class_id AND student_id = " . $_SESSION['user_id']);
+                                if($chk_rev->num_rows > 0) $has_reviewed = true;
+                            }
+                        ?>
+
+                        <?php if (!$has_reviewed): ?>
+                            <button type="button" class="btn btn-warning w-100 btn-sm fw-bold mt-2" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                                <i class="bi bi-star-fill me-1"></i> Đánh giá Gia sư
+                            </button>
+                        <?php else: ?>
+                            <div class="alert alert-success text-center small mt-2 py-2 mb-0">
+                                <i class="bi bi-check-circle"></i> Bạn đã đánh giá lớp này.
+                            </div>
+                        <?php endif; ?>
 
                         <?php 
                             // Kiểm tra xem user này đã báo cáo lớp này chưa
@@ -220,6 +259,8 @@ $avatar_url = (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avata
                     </p>
                 <?php endif; ?>
             </div>
+
+
 
             <div class="card card-detail p-4 register-box border-success border-top border-4">
                 <h5 class="fw-bold mb-3">Đăng ký học</h5>
@@ -312,6 +353,53 @@ $avatar_url = (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avata
             </div>
         </form>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="reviewModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form action="student/handle_review.php" method="POST">
+          <input type="hidden" name="class_id" value="<?= $class_id ?>">
+          <input type="hidden" name="tutor_id" value="<?= $row['tutor_id'] ?>">
+          
+          <div class="modal-header bg-warning text-dark">
+            <h5 class="modal-title fw-bold"><i class="bi bi-star-half me-2"></i>Đánh giá Gia sư</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body text-center">
+                <p class="mb-2 fw-bold text-secondary">Bạn cảm thấy chất lượng dạy thế nào?</p>
+                
+                <div class="star-rating-box mb-4">
+                    <input type="radio" id="star5" name="rating" value="5" required />
+                    <label for="star5" title="Tuyệt vời"></label>
+
+                    <input type="radio" id="star4" name="rating" value="4" />
+                    <label for="star4" title="Tốt"></label>
+
+                    <input type="radio" id="star3" name="rating" value="3" />
+                    <label for="star3" title="Bình thường"></label>
+
+                    <input type="radio" id="star2" name="rating" value="2" />
+                    <label for="star2" title="Tệ"></label>
+
+                    <input type="radio" id="star1" name="rating" value="1" />
+                    <label for="star1" title="Rất tệ"></label>
+                </div>
+
+                <div class="text-start">
+                    <label class="form-label fw-bold">Nhận xét chi tiết:</label>
+                    <textarea name="comment" class="form-control" rows="3" placeholder="Ví dụ: Gia sư dạy rất dễ hiểu, nhiệt tình..."></textarea>
+                </div>
+            </div>
+
+            
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            <button type="submit" class="btn btn-warning fw-bold">Gửi đánh giá</button>
+          </div>
+      </form>
     </div>
   </div>
 </div>

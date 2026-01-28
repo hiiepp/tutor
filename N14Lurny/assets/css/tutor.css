@@ -246,3 +246,38 @@ ul { list-style: none; padding: 0; margin: 0; }
 .dropdown-menu ul::-webkit-scrollbar-track { background: #f1f1f1; }
 .dropdown-menu ul::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 .dropdown-menu ul::-webkit-scrollbar-thumb:hover { background: var(--brand-color); }
+
+/* =========================================
+   ĐÁNH GIÁ 5 SAO 
+   ========================================= */
+.star-rating-box {
+    display: flex;
+    flex-direction: row-reverse; /* Đảo ngược để xử lý logic CSS */
+    justify-content: center;
+    gap: 10px;
+}
+
+.star-rating-box input {
+    display: none; /* Ẩn nút radio tròn xấu xí */
+}
+
+.star-rating-box label {
+    font-size: 40px; /* Kích thước sao to */
+    color: #ddd;     /* Màu xám mặc định */
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+/* Tạo hình ngôi sao */
+.star-rating-box label:before {
+    content: '★'; 
+}
+
+/* Hiệu ứng: Khi hover hoặc đã chọn */
+.star-rating-box label:hover,
+.star-rating-box label:hover ~ label,
+.star-rating-box input:checked ~ label {
+    color: #ffc107; /* Màu vàng sáng */
+    transform: scale(1.1); /* Phóng to nhẹ */
+}
