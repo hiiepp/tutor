@@ -85,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <form method="POST" class="form-card bg-white shadow-sm" onsubmit="return validateDates()">
                 <div class="form-header py-4 px-4 px-md-5">
-                    <h3 class="m-0 fw-bold"><i class="bi bi-pencil-square me-2"></i> Đăng yêu cầu tìm Gia sư</h3>
+                    <h3 class="m-0 fw-bold"><i class="bi bi-pencil-square me-2"></i> Đăng yêu cầu tìm Học Viên</h3>
                 </div>
 
                 <div class="p-4 p-md-5">

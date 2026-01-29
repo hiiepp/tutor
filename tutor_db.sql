@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th1 28, 2026 lúc 07:38 PM
+-- Thời gian đã tạo: Th1 29, 2026 lúc 05:44 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
--- Phiên bản PHP: 8.2.12
+-- Phiên bản PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -67,22 +67,12 @@ CREATE TABLE `classes` (
 --
 
 INSERT INTO `classes` (`id`, `tutor_id`, `title`, `subject`, `grade`, `price`, `description`, `method`, `location`, `status`, `max_students`, `start_date`, `end_date`, `created_at`) VALUES
-(1, 2, 'Gia sư Toán Lớp 9 lấy gốc', 'Toán', 'Lớp 9', '200000', 'Nhận dạy kèm Toán 9, ôn thi vào 10. Cam kết tiến bộ sau 1 tháng.', 'Offline', 'Quận Gò Vấp', 'active', 1, NULL, NULL, '2025-12-29 09:16:12'),
-(2, 2, 'Luyện thi Đại học môn Lý', 'Vật lý', 'Lớp 12', '300000', 'Chuyên luyện đề Lý 12, mục tiêu 8+.', 'Offline', 'Quận Bình Thạnh', 'active', 1, NULL, NULL, '2025-12-29 09:16:12'),
-(3, 3, 'Tiếng Anh giao tiếp Online', 'Tiếng Anh', 'Lớp 10', '150000', 'Học giao tiếp phản xạ qua Zoom/Google Meet.', 'Online', 'Toàn quốc', 'active', 1, NULL, NULL, '2025-12-29 09:16:12'),
-(4, 3, 'Rèn chữ đẹp cho bé', 'Văn', 'Lớp 1', '120000', 'Cô giáo kiên nhẫn, rèn chữ, tập đọc.', 'Offline', 'Quận 7', 'active', 1, NULL, NULL, '2025-12-29 09:16:12'),
-(5, 2, 'Hóa học nâng cao 11', 'Hóa học', 'Lớp 11', '250000', 'Dạy chuyên sâu Hóa hữu cơ.', 'Offline', 'TP. Thủ Đức', 'active', 1, NULL, NULL, '2025-12-29 09:16:12'),
-(6, 3, 'Toán tư duy cho trẻ em', 'Toán', 'Lớp 3', '180000', 'Phương pháp mới giúp bé tính nhanh.', 'Offline', 'Quận 1', 'active', 1, NULL, NULL, '2025-12-29 09:16:12'),
-(7, 8, 'hiep dep trai', 'Toán', 'Lớp 1', '20000', 'Mô tả: học bao rớt môn\nSố học viên: 5\nLịch học: adsacd\nYêu cầu: ', 'Offline', 'âs', '', 1, NULL, NULL, '2026-01-07 08:43:58'),
-(8, 8, 'ádc', 'Toán', 'Lớp 1', '2000000 VND/Giờ', 'Mô tả: xcƯDVCA\nSố học viên: 1\nLịch học: ACDSƯDA\nYêu cầu: DFCQỪC', 'Offline', 'CÁDC', 'active', 1, NULL, NULL, '2026-01-13 01:37:44'),
-(9, 8, 'a', 'Toán', 'Lớp 1', '200000 VND/Giờ', 'Mô tả: ádc\nSố học viên: 1\nLịch học: \nYêu cầu: 23rf3rq', 'Offline', '', 'hidden', 1, NULL, NULL, '2026-01-13 04:45:56'),
-(10, 8, 'aaâf', 'Toán', 'Lớp 1', '300000 VND/Giờ', 'Mô tả: fff\nSố học viên: 1\nLịch học: \nYêu cầu: ', 'Offline', '', 'active', 1, NULL, NULL, '2026-01-13 04:50:26'),
-(11, 8, 'scasa', 'Lý', 'Lớp 1', '2000000 VND/Giờ', 'Mô tả: casc\nSố học viên: 6\nLịch học: cac\nYêu cầu: wfwer', 'Online', 'asc', 'active', 1, NULL, NULL, '2026-01-13 09:43:35'),
-(12, 11, 'adddaa', 'Toán', 'Lớp 1', '2000000 VND/Giờ', 'Mô tả: âsấ\nSố học viên: 1\nLịch học: ắè\nYêu cầu: ầẻdsf', 'Offline', '10 nguyễn xuân hiệp, Xã Trung Lập Hạ, Huyện Củ Chi, TP. Hồ Chí Minh', 'active', 1, NULL, NULL, '2026-01-14 07:45:00'),
-(18, 13, 'âcs', 'Toán', 'Lớp 1', '3000000 VND/Giờ', 'Mô tả: dasa\nLịch học: áda\nYêu cầu: ', 'Offline', 'cfasdcasecd, Phường Linh Tây, Quận Thủ Đức, TP. Hồ Chí Minh', 'closed', 1, '2026-01-20', '2026-01-30', '2026-01-20 10:14:00'),
-(19, 13, 'WQEF', 'Toán', 'Lớp 1', '3000000 VND/Giờ', 'Mô tả: \nLịch học: ằGWEARF\nYêu cầu: ', 'Offline', 'qwfawe, Phường 22, Quận Bình Thạnh, TP. Hồ Chí Minh', 'hidden', 1, '2026-01-29', '2026-02-06', '2026-01-20 10:15:34'),
-(20, 13, 'vsef', 'Toán', 'Lớp 1', '30000 VND/Giờ', 'Mô tả: qè\nLịch học: wafw\nYêu cầu: ', 'Offline', 'fqwef, Phường 12, Quận Gò Vấp, TP. Hồ Chí Minh', 'active', 6, '2026-01-24', '2026-02-07', '2026-01-22 18:16:34'),
-(21, 16, 'fgbn', 'Toán', 'Lớp 1', '5000000 VND/Giờ', 'Mô tả: tgdfkjm\nLịch học: dtjy\nYêu cầu: ', 'Offline', 'jtdjy, Phường 12, Quận Tân Bình, TP. Hồ Chí Minh', 'closed', 1, '2026-01-28', '2026-02-06', '2026-01-28 18:21:20');
+(22, 18, 'Lớp Toán nâng cao học sinh chuyên 10', 'Toán', 'Lớp 10', '50000 VND/Giờ', 'Mô tả: Chào mừng em đến với lớp học! Đến với lớp học, em sẽ được học bắt đầu từ kiến thức cơ bản đến vận dụng, vận dụng cao. Bên cạnh việc học, em cũng sẽ có các bài kiểm tra giúp em biết được lực học của mình từ đó khắc phục điểm còn yếu.\nLịch học: Tối 3-4-7 (18h-20h30)\nYêu cầu: ', 'Offline', '235/23 Tân Hiệp, Xã Tân Hiệp, Huyện Hóc Môn, TP. Hồ Chí Minh', 'active', 10, '2026-01-29', '2026-02-05', '2026-01-29 03:08:44'),
+(23, 21, 'Hóa 12 - Ôn thi THPT QG', 'Hóa', 'Ôn thi ĐH', '40000 VND/Giờ', 'Mô tả: Giúp các bạn có thể làm tốt các bài tập từ dễ đến khó và nằm chắc lý thuyết. CÓ THỂ HỌC THỬ 1 BUỔI FREE!!!! \nLịch học: Tối 2-4-6 (20h-22h)\nYêu cầu: ', 'Offline', '34 Đường số 2, Linh Chiểu, Thủ Đức, Thành phố Hồ Chí Minh, Việt Nam, Phường Linh Chiểu, Quận Thủ Đức', 'active', 10, '2026-01-29', '2026-02-05', '2026-01-29 03:17:42'),
+(24, 21, 'Hóa 10 - Bồi dưỡng kiến thức ', 'Hóa', 'Lớp 10', '35000 VND/Giờ', 'Mô tả: Hỗ trợ các bạn mất gốc môn Hoá hoặc muốn cải thiện điểm lên khá giỏi.\nLịch học: Sáng T7-CN (6h-8h)\nYêu cầu: ', 'Offline', '34 Đường số 2, Linh Chiểu, Thủ Đức, Thành phố Hồ Chí Minh, Việt Nam, Phường Linh Chiểu, Quận Thủ Đức', 'active', 5, '2026-01-29', '2026-02-06', '2026-01-29 03:26:17'),
+(25, 18, 'Toán 11 - Lấy gốc chuẩn bị cho THPT QG', 'Toán', 'Lớp 11', '100000 VND/Buổi', 'Mô tả: Giảng dạy theo từng chuyên đề, kết hợp làm bài tập tổng hợp, tận tâm, nhiệt huyết, có hỗ trợ ngoài giờ học...\nLịch học: Sáng 2-3-4 (9h-11h)\nYêu cầu: ', 'Offline', 'PJ45+3H4, phường 7, Quận 8, Thành phố Hồ Chí Minh, Việt Nam, Phường 7, Quận 8, TP. Hồ Chí Minh', 'active', 10, '2026-01-29', '2026-02-06', '2026-01-29 04:09:07'),
+(26, 18, 'Toán 10 - Chương trình mới', 'Toán', 'Lớp 10', '30000 VND/Giờ', 'Mô tả: Xây dựng nội dung bám sát theo chương trình mới...\nLịch học: Tối 6-7-CN (19h-20h30)\nYêu cầu: ', 'Online', 'https://meet.google.com/landing', 'active', 10, '2026-01-29', '2026-02-05', '2026-01-29 04:11:28'),
+(27, 24, 'Tiếng việt - Lớp 1', 'Văn', 'Lớp 1', '50000 VND/Giờ', 'Mô tả: Rèn luyện chữ viết đúng viết đẹp, cung cấp các kiến thức Tiếng Việt cần thiết\nLịch học: Chiều 2-4-6 (13h-15h)\nYêu cầu: ', 'Offline', '69 Đ. Số 7, Phước Kiển, Nhà Bè, Thành phố Hồ Chí Minh 700000, Việt Nam, Xã Phước Kiển, Huyện Nhà Bè,', 'pending', 5, '2026-01-29', '2026-02-06', '2026-01-29 04:41:41');
 
 -- --------------------------------------------------------
 
@@ -105,11 +95,8 @@ CREATE TABLE `class_registrations` (
 --
 
 INSERT INTO `class_registrations` (`id`, `class_id`, `student_id`, `status`, `message`, `tutor_note`, `created_at`) VALUES
-(1, 7, 9, 'accepted', 'ád', NULL, '2026-01-09 04:21:18'),
-(7, 19, 14, 'accepted', 'qwdw', NULL, '2026-01-20 10:16:45'),
-(8, 20, 15, 'accepted', 'qd', NULL, '2026-01-22 18:17:38'),
-(9, 20, 9, 'pending', 'jtkcdf', NULL, '2026-01-28 18:19:32'),
-(10, 21, 9, 'accepted', 'ừc', NULL, '2026-01-28 18:22:16');
+(11, 22, 20, 'accepted', 'Em muốn tham gia để nâng cao kiến thức toán học.', NULL, '2026-01-29 03:13:27'),
+(12, 24, 19, 'accepted', 'Em muốn được cải thiện điểm.', NULL, '2026-01-29 03:27:34');
 
 -- --------------------------------------------------------
 
@@ -158,7 +145,11 @@ INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `is_read`, `li
 (10, 9, 'Cập nhật báo cáo ℹ️', 'Báo cáo của bạn bị hủy do gia sư khiếu nại thành công.', 1, 'class-detail.php?id=14', '2026-01-22 21:39:19'),
 (11, 13, 'Học viên mới đăng ký 🎓', 'Học viên <strong>a</strong> vừa đăng ký lớp: <strong>vsef</strong>. Hãy kiểm tra ngay.', 0, 'see_details.php?id=20', '2026-01-28 18:19:32'),
 (12, 16, 'Học viên mới đăng ký 🎓', 'Học viên <strong>a</strong> vừa đăng ký lớp: <strong>fgbn</strong>. Hãy kiểm tra ngay.', 0, 'see_details.php?id=21', '2026-01-28 18:22:16'),
-(13, 9, 'Đăng ký thành công! ✅', 'Chúc mừng! Gia sư đã duyệt bạn vào lớp: <strong>fgbn</strong>. Nhấn vào đây để xem thông tin liên hệ.', 0, 'class-detail.php?id=21', '2026-01-28 18:22:29');
+(13, 9, 'Đăng ký thành công! ✅', 'Chúc mừng! Gia sư đã duyệt bạn vào lớp: <strong>fgbn</strong>. Nhấn vào đây để xem thông tin liên hệ.', 1, 'class-detail.php?id=21', '2026-01-28 18:22:29'),
+(14, 18, 'Học viên mới đăng ký 🎓', 'Học viên <strong>Nguyễn Thị D</strong> vừa đăng ký lớp: <strong>Lớp Toán nâng cao học sinh chuyên 10</strong>. Hãy kiểm tra ngay.', 1, 'see_details.php?id=22', '2026-01-29 03:13:27'),
+(15, 21, 'Học viên mới đăng ký 🎓', 'Học viên <strong>Nguyễn Thị C</strong> vừa đăng ký lớp: <strong>Hóa 10 - Bồi dưỡng kiến thức </strong>. Hãy kiểm tra ngay.', 1, 'see_details.php?id=24', '2026-01-29 03:27:34'),
+(16, 19, 'Đăng ký thành công! ✅', 'Chúc mừng! Gia sư đã duyệt bạn vào lớp: <strong>Hóa 10 - Bồi dưỡng kiến thức </strong>. Nhấn vào đây để xem thông tin liên hệ.', 1, 'class-detail.php?id=24', '2026-01-29 03:27:49'),
+(17, 20, 'Đăng ký thành công! ✅', 'Chúc mừng! Gia sư đã duyệt bạn vào lớp: <strong>Lớp Toán nâng cao học sinh chuyên 10</strong>. Nhấn vào đây để xem thông tin liên hệ.', 0, 'class-detail.php?id=22', '2026-01-29 03:42:33');
 
 -- --------------------------------------------------------
 
@@ -200,7 +191,7 @@ CREATE TABLE `reviews` (
 --
 
 INSERT INTO `reviews` (`id`, `class_id`, `student_id`, `tutor_id`, `rating`, `comment`, `created_at`) VALUES
-(1, 21, 9, 16, 5, 'sfvga', '2026-01-28 18:28:36');
+(2, 24, 19, 21, 5, 'Gia sư tận tâm, chỉ dạy rất nhiệt tình giúp em nhanh tiếp thu kiến thức.', '2026-01-29 04:12:48');
 
 -- --------------------------------------------------------
 
@@ -214,6 +205,13 @@ CREATE TABLE `tutor_proofs` (
   `image_path` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `tutor_proofs`
+--
+
+INSERT INTO `tutor_proofs` (`id`, `user_id`, `image_path`, `created_at`) VALUES
+(13, 18, 'proof_18_1769659516_0.jpg', '2026-01-29 04:05:16');
 
 -- --------------------------------------------------------
 
@@ -251,18 +249,14 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `role`, `avatar`, `dob`, `gender`, `phone`, `bio`, `major`, `degree`, `experience`, `address`, `school`, `grade`, `created_at`, `warnings_count`, `is_banned`, `avg_rating`, `review_count`) VALUES
 (1, 'Admin Quản Trị', 'admin@gmail.com', '$2y$10$fNXThoEgdxdf9nsvXPJwn.9Qpp0mpves1RJ0hPVfafcn4Hm46jnhm', 'admin', NULL, NULL, 'Nam', '0909000000', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12', 0, 0, 0, 0),
-(2, 'Nguyễn Văn Gia Sư', 'tutor1@gmail.com', '$2y$10$YourHashedPasswordHere', 'tutor', NULL, NULL, 'Nam', '0912345678', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12', 0, 0, 0, 0),
-(3, 'Trần Thị Cô Giáo', 'tutor2@gmail.com', '$2y$10$YourHashedPasswordHere', 'tutor', NULL, NULL, 'Nam', '0987654321', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12', 0, 0, 0, 0),
-(4, 'abc', 'student1@gmail.com', '$2y$10$YourHashedPasswordHere', 'student', NULL, NULL, 'Nam', '0933333333', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-29 09:16:12', 0, 0, 0, 0),
-(7, 'abc', 'abc@gmail.com', '$2y$10$Hch33NYyxBQ4s5HKfooy3.W29yCMuPanBww/7TxrClHJD7wv7UCl2', 'student', 'stu_7_1769103497.jpg', '2015-10-17', 'Nam', '0394684282', NULL, NULL, NULL, NULL, 'âsá', 'dqwdwe', 'Lớp 10', '2025-12-31 15:10:09', 0, 0, 0, 0),
-(8, 'hhh', 'h@gmail.com', '$2y$10$2nDuIl3VMzdW42hxToBXvOUsGNzgtMcF5Hzv9/yNP0XstHmDzdbU6', 'tutor', NULL, NULL, 'Nam', '0134567865', 'đẹp trai', '', 'Sinh viên', '2 năm', '', NULL, NULL, '2026-01-07 08:15:37', 0, 0, 0, 0),
-(9, 'a', 'a@gmail.com', '$2y$10$1kJpyarTH6jeny50w6j8FevWCjslReHpbgfVKvrZituocwprzCj9q', 'student', 'stu_9_1768897966.jpg', '2018-06-14', 'Nam', '0123456789', NULL, NULL, NULL, NULL, '', '', '', '2026-01-07 08:16:35', 0, 0, 0, 0),
-(10, 'ad', 'ad@gmail.com', '$2y$10$1OhJVY8X0pBqId86BlJmIOQNc8B7.YibU63yP0FsVW8qu4JGUrMX2', 'tutor', NULL, NULL, 'Nam', 'adàda', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-14 07:13:22', 0, 0, 0, 0),
-(11, 'abc', 'z@gmail.com', '$2y$10$3.8QH143KzmP3xhbLgNDZOFbb50CZ87m1tULOQOKJ6NjCeckv4yMO', 'tutor', 'user_11_1768376282.png', '2006-02-09', 'Nam', '0323456789', '', '', '', '', '', NULL, NULL, '2026-01-14 07:21:40', 0, 0, 0, 0),
-(13, 'ádf', 'q@gmail.com', '$2y$10$fdJDXrvOoz5SMeWxq/DUHeNR0rqullwVstPMCKQuwknkgZ8KKCwP2', 'tutor', 'user_13_1769103159.jpg', NULL, 'Nam', '0913434524', '', '', '', '', '', NULL, NULL, '2026-01-20 10:12:47', 0, 0, 0, 0),
-(14, '1', 'w@gmail.com', '$2y$10$jDmA7PNW0qMDux92ny3bLuymiJGKPvBqdqrwggshNwO1G2mwPGnhi', 'student', NULL, NULL, 'Nam', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-20 10:16:33', 0, 0, 0, 0),
-(15, '1', '1@gmail.com', '$2y$10$x6nxa17VcG0ey0TW7v6JNOe1MlDt4cs0wcURX0hG4umCc5hL85Uue', 'student', 'stu_15_1769108774.jpg', '0000-00-00', 'Nam', '', NULL, NULL, NULL, NULL, '', '', '', '2026-01-22 18:17:21', 0, 0, 0, 0),
-(16, 'a', 'ab@gmail.com', '$2y$10$Sw78p2Y1qhZNPJ4zMkAjz.88e8Pz38qv0NjFD/UCLB3d8rURevcPy', 'tutor', NULL, NULL, 'Nam', '0923423412', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-28 18:20:52', 0, 0, 5, 1);
+(17, 'Nguyễn Văn A', 'a@gmail.com', '$2y$10$HGBX6J6Mepj6xbCCd6Bg3O0xt1.YKQtg5qiN7fKKXcgo1pJyMTWuW', 'student', NULL, NULL, 'Nam', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-29 02:59:22', 0, 0, 0, 0),
+(18, 'Nguyễn Văn B', 'b@gmail.com', '$2y$10$6PmTXfaOWV.OX3s7MMgLJu/UbdfcpQBXxxv/E3etmOwgGLfoGOH1m', 'tutor', NULL, '1999-02-11', 'Nam', '0945063678', '', 'Toán', 'Giáo viên', '5 năm dạy học', '323/3 Ấp Chánh 1, Tân Xuân, Hóc Môn, Thành phố Hồ Chí Minh, Việt Nam', NULL, NULL, '2026-01-29 02:59:50', 0, 0, 0, 0),
+(19, 'Nguyễn Thị C', 'c@gmail.com', '$2y$10$Y0dJLNto8VCWgCfClYqAAeCVBENwE7OSZLZEBpet3nceP12dbSlaO', 'student', NULL, '2010-02-11', 'Nam', '0876112345', NULL, NULL, NULL, NULL, '9 Đường Số 9 - Cư Xá Vườn Dâu, Linh Chiểu, Thủ Đức, Thành phố Hồ Chí Minh, Việt Nam', '', 'Lớp 10', '2026-01-29 03:00:12', 0, 0, 0, 0),
+(20, 'Nguyễn Thị D', 'd@gmail.com', '$2y$10$MZwEZPtJZ5C8MQ63TM79o.DoRNqolJ7.tePi0i7jSONZyWPu950oG', 'student', 'user_20_1769657814.png', NULL, 'Nam', '', NULL, NULL, NULL, NULL, '', NULL, NULL, '2026-01-29 03:00:42', 0, 0, 0, 0),
+(21, 'Đỗ Thị A', 'da@gmail.com', '$2y$10$7Nv3ULbNh6iTgo74cjU39O4fEu.Ycy61lH7I7qNt9XFyZdXkK0gPW', 'tutor', NULL, '1995-07-07', 'Nam', '0967754222', '', 'Hóa học', 'Giáo viên', '6 năm giảng dạy THPT', '34 Đường số 2, Linh Chiểu, Thủ Đức, Thành phố Hồ Chí Minh, Việt Nam', NULL, NULL, '2026-01-29 03:01:17', 0, 0, 5, 1),
+(22, 'Hoàng Văn B', 'hb@gmail.com', '$2y$10$12HHcZbY/H4H/pa47Z5UCOyhy07tgDK17zMs7VKNj3VMUq4YEIwpK', 'tutor', NULL, NULL, 'Nam', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-29 03:01:46', 0, 0, 0, 0),
+(23, 'Nguyễn Thị C', 'nc@gmail.com', '$2y$10$HIpD8RuFY/0CJNd.cQhPCu8GSOrCn4jhZY7ZaTuhd8kLDp8jTjLh.', 'tutor', NULL, NULL, 'Nam', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-29 03:02:10', 0, 0, 0, 0),
+(24, 'Hoàng B', 'bh@gmail.com', '$2y$10$SneHyLt5hmjxd619naUDn.62C21zHhmVuAf6XMKZoVo3estfDiclm', 'tutor', NULL, NULL, 'Nam', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-29 03:02:51', 0, 0, 0, 0);
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -351,13 +345,13 @@ ALTER TABLE `appeals`
 -- AUTO_INCREMENT cho bảng `classes`
 --
 ALTER TABLE `classes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT cho bảng `class_registrations`
 --
 ALTER TABLE `class_registrations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT cho bảng `enrollments`
@@ -369,7 +363,7 @@ ALTER TABLE `enrollments`
 -- AUTO_INCREMENT cho bảng `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT cho bảng `reports`
@@ -381,19 +375,19 @@ ALTER TABLE `reports`
 -- AUTO_INCREMENT cho bảng `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT cho bảng `tutor_proofs`
 --
 ALTER TABLE `tutor_proofs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- Các ràng buộc cho các bảng đã đổ

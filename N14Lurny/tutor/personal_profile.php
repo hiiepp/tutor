@@ -22,7 +22,7 @@ if (isset($_GET['del_proof'])) {
         $file_path = "../assets/uploads/proofs/" . $row['image_path'];
         if (file_exists($file_path)) unlink($file_path); // Xóa file vật lý
         $conn->query("DELETE FROM tutor_proofs WHERE id=$proof_id"); // Xóa DB
-        header("Location: personal_profile.php"); // Load lại trang
+        echo "<script>window.location.href='personal_profile.php';</script>";
         exit();
     }
 }
@@ -183,11 +183,22 @@ $initials = mb_strtoupper(mb_substr($user['full_name'], 0, 1, "UTF-8"));
                     </div>
 
                     <div class="row g-3">
-                        <div class="col-md-6"><label class="form-label">Họ và tên <span class="text-danger">*</span></label><input type="text" name="hoten" class="form-control" value="<?= htmlspecialchars($user['full_name']) ?>" required></div>
-                        <div class="col-md-6"><label class="form-label">Email</label><input type="email" class="form-control bg-light" value="<?= htmlspecialchars($user['email']) ?>" disabled></div>
-                        <div class="col-md-6"><label class="form-label">Số điện thoại</label><input type="text" name="sdt" class="form-control" value="<?= htmlspecialchars($user['phone']) ?>"></div>
-                        <div class="col-md-6"><label class="form-label">Ngày sinh</label><input type="date" name="dob" class="form-control" value="<?= htmlspecialchars($user['dob'] ?? '') ?>"></div>
-                        <div class="col-12"><label class="form-label">Địa chỉ</label><input type="text" name="diachi" class="form-control" value="<?= htmlspecialchars($user['address'] ?? '') ?>"></div>
+                        <div class="col-md-6">
+                            <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                            <input type="text" name="hoten" class="form-control" value="<?= htmlspecialchars($user['full_name']) ?>" required>
+                        </div>
+                        <div class="col-md-6"><label class="form-label">Email</label>
+                            <input type="email" class="form-control bg-light" value="<?= htmlspecialchars($user['email']) ?>" disabled>
+                        </div>
+                        <div class="col-md-6"><label class="form-label">Số điện thoại</label>
+                            <input type="text" name="sdt" class="form-control" value="<?= htmlspecialchars($user['phone']) ?>">
+                        </div>
+                        <div class="col-md-6"><label class="form-label">Ngày sinh</label>
+                            <input type="date" name="dob" class="form-control" value="<?= htmlspecialchars($user['dob'] ?? '') ?>">
+                        </div>
+                        <div class="col-12"><label class="form-label">Địa chỉ</label>
+                            <input type="text" name="diachi" class="form-control" value="<?= htmlspecialchars($user['address'] ?? '') ?>">
+                        </div>
                     </div>
                 </div>
 
