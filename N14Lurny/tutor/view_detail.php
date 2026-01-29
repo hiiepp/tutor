@@ -171,6 +171,9 @@ $is_owner = (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $tutor_id);
             <li class="info-list-item"><span class="text-muted">Email</span><span class="fw-medium text-end ps-2 text-dark"><?= htmlspecialchars($tutor['email']) ?></span></li>
             <li class="info-list-item"><span class="text-muted">Ngày sinh</span><span class="fw-medium text-end ps-2 text-dark"><?= $dob_display ?></span></li>
             <li class="info-list-item"><span class="text-muted">Tuổi</span><span class="fw-medium text-end ps-2 text-dark"><?= $age_display ?></span></li>
+            
+            <li class="info-list-item"><span class="text-muted">Giới tính</span><span class="fw-medium text-end ps-2 text-dark"><?= htmlspecialchars($tutor['gender'] ?? 'Chưa cập nhật') ?></span></li>
+
             <li class="info-list-item"><span class="text-muted">Chuyên ngành</span><span class="fw-medium text-end ps-2"><?= htmlspecialchars($tutor['major'] ?? 'Chưa cập nhật') ?></span></li>
             <li class="info-list-item"><span class="text-muted">Trình độ</span><span class="fw-medium text-end ps-2"><?= htmlspecialchars($tutor['degree'] ?? 'Chưa cập nhật') ?></span></li>
             <li class="info-list-item"><span class="text-muted">Kinh nghiệm</span><span class="fw-medium text-end ps-2"><?= htmlspecialchars($tutor['experience'] ?? 'Chưa cập nhật') ?></span></li>

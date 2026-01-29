@@ -258,6 +258,11 @@ $reviews_res = $conn->query($reviews_sql);
                 </div>
 
                 <div class="mb-3">
+                    <div class="info-label"><i class="bi bi-gender-ambiguous me-1"></i> Giới tính</div>
+                    <div class="info-value"><?= htmlspecialchars($tutor['gender'] ?? 'Chưa cập nhật') ?></div>
+                </div>
+
+                <div class="mb-3">
                     <div class="info-label"><i class="bi bi-cake2 me-1"></i> Tuổi</div>
                     <div class="info-value"><?= $age_display ?></div>
                 </div>
@@ -280,7 +285,7 @@ $reviews_res = $conn->query($reviews_sql);
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content bg-transparent border-0">
       <div class="modal-body p-0 text-center position-relative">
-        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss=\"modal\"></button>
         <img id="modalImage" src="" class="img-fluid rounded shadow-lg">
       </div>
     </div>

@@ -19,7 +19,8 @@ $max_price = (is_numeric($raw_max)) ? intval($raw_max) : '';
 $filter_start = isset($_GET['filter_start']) ? $_GET['filter_start'] : '';
 $filter_end = isset($_GET['filter_end']) ? $_GET['filter_end'] : '';
 
-$sql = "SELECT classes.*, users.full_name, users.avatar 
+// --- CẬP NHẬT SQL: THÊM users.gender ---
+$sql = "SELECT classes.*, users.full_name, users.avatar, users.gender 
         FROM classes 
         LEFT JOIN users ON classes.tutor_id = users.id 
         WHERE classes.status = 'active'";
@@ -213,7 +214,7 @@ try {
                 $has_avatar = !empty($row['avatar']) && file_exists("assets/uploads/avatars/" . $row['avatar']);
                 $avatar_src = $has_avatar ? "assets/uploads/avatars/" . $row['avatar'] : "";
 
-                // 4. XỬ LÝ NGÀY THÁNG ĐỂ HIỂN THỊ (MỚI)
+                // 4. XỬ LÝ NGÀY THÁNG ĐỂ HIỂN THỊ
                 $date_display = "Chưa cập nhật";
                 if (!empty($row['start_date']) && !empty($row['end_date'])) {
                     $date_display = date('d/m/Y', strtotime($row['start_date'])) . ' - ' . date('d/m/Y', strtotime($row['end_date']));
@@ -236,6 +237,8 @@ try {
                                 </div>
                                 <div class="d-flex flex-wrap gap-3 text-secondary small">
                                     <div class="d-flex align-items-center"><i class="bi bi-mortarboard me-2 text-brand"></i> <?= htmlspecialchars($row['grade']) ?></div>
+                                    
+                                    <div class="d-flex align-items-center"><i class="bi bi-gender-ambiguous me-2 text-brand"></i> <?= htmlspecialchars($row['gender'] ?? 'Chưa cập nhật') ?></div>
                                     <div class="d-flex align-items-center"><i class="bi bi-geo-alt me-2 text-brand"></i> <span class="text-truncate" style="max-width: 150px;"><?= htmlspecialchars($row['location']) ?></span></div>
                                     <div class="d-flex align-items-center"><i class="bi bi-calendar-range me-2 text-brand"></i> <?= $date_display ?></div>
                                 </div>

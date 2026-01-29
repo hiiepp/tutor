@@ -32,6 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $full_name = trim($_POST['hoten']);
     $phone = trim($_POST['sdt']);
     $address = trim($_POST['diachi']);
+    $gender = isset($_POST['gioitinh']) ? trim($_POST['gioitinh']) : null; // <--- MỚI: Lấy giới tính
     $dob = !empty($_POST['dob']) ? $_POST['dob'] : null;
     
     $degree = isset($_POST['trinhdo']) ? trim($_POST['trinhdo']) : null;
@@ -53,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // --- MỚI: XỬ LÝ UPLOAD ẢNH MINH CHỨNG (MULTIPLE) ---
+    // --- XỬ LÝ UPLOAD ẢNH MINH CHỨNG (MULTIPLE) ---
     if (isset($_FILES['proofs']) && count($_FILES['proofs']['name']) > 0) {
         $proof_dir = "../assets/uploads/proofs/";
         if (!file_exists($proof_dir)) { mkdir($proof_dir, 0777, true); }
@@ -63,11 +64,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         for ($i = 0; $i < $total_files; $i++) {
             if ($_FILES['proofs']['error'][$i] == 0) {
                 $p_ext = strtolower(pathinfo($_FILES['proofs']['name'][$i], PATHINFO_EXTENSION));
-                // Đặt tên file unique
                 $p_name = "proof_" . $user_id . "_" . time() . "_" . $i . "." . $p_ext;
                 
                 if (move_uploaded_file($_FILES['proofs']['tmp_name'][$i], $proof_dir . $p_name)) {
-                    // Chèn vào bảng tutor_proofs
                     $stmt_proof = $conn->prepare("INSERT INTO tutor_proofs (user_id, image_path) VALUES (?, ?)");
                     $stmt_proof->bind_param("is", $user_id, $p_name);
                     $stmt_proof->execute();
@@ -80,9 +79,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message = "Họ tên không được để trống!";
         $msg_type = "danger";
     } elseif ($upload_ok) {
-        $sql = "UPDATE users SET full_name=?, phone=?, address=?, dob=?, degree=?, major=?, experience=?, bio=? $avatar_sql WHERE id=?";
+        // CẬP NHẬT SQL: Thêm gender
+        $sql = "UPDATE users SET full_name=?, phone=?, address=?, gender=?, dob=?, degree=?, major=?, experience=?, bio=? $avatar_sql WHERE id=?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssssssi", $full_name, $phone, $address, $dob, $degree, $major, $experience, $bio, $user_id);
+        // bind_param: sssssssssi (10 tham số string, 1 int)
+        $stmt->bind_param("sssssssssi", $full_name, $phone, $address, $gender, $dob, $degree, $major, $experience, $bio, $user_id);
         
         if ($stmt->execute()) {
             $_SESSION['fullname'] = $full_name;
@@ -102,7 +103,6 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 
-// Lấy danh sách ảnh minh chứng
 $proofs_res = $conn->query("SELECT * FROM tutor_proofs WHERE user_id = $user_id ORDER BY id DESC");
 
 $avatar_url = (!empty($user['avatar']) && file_exists("../assets/uploads/avatars/" . $user['avatar'])) 
@@ -190,13 +190,25 @@ $initials = mb_strtoupper(mb_substr($user['full_name'], 0, 1, "UTF-8"));
                         <div class="col-md-6"><label class="form-label">Email</label>
                             <input type="email" class="form-control bg-light" value="<?= htmlspecialchars($user['email']) ?>" disabled>
                         </div>
+                        
                         <div class="col-md-6"><label class="form-label">Số điện thoại</label>
                             <input type="text" name="sdt" class="form-control" value="<?= htmlspecialchars($user['phone']) ?>">
                         </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Giới tính</label>
+                            <select name="gioitinh" class="form-select">
+                                <option value="">-- Chọn --</option>
+                                <option value="Nam" <?= ($user['gender'] == 'Nam') ? 'selected' : '' ?>>Nam</option>
+                                <option value="Nữ" <?= ($user['gender'] == 'Nữ') ? 'selected' : '' ?>>Nữ</option>
+                                <option value="Khác" <?= ($user['gender'] == 'Khác') ? 'selected' : '' ?>>Khác</option>
+                            </select>
+                        </div>
+
                         <div class="col-md-6"><label class="form-label">Ngày sinh</label>
                             <input type="date" name="dob" class="form-control" value="<?= htmlspecialchars($user['dob'] ?? '') ?>">
                         </div>
-                        <div class="col-12"><label class="form-label">Địa chỉ</label>
+                        <div class="col-md-6"><label class="form-label">Địa chỉ</label>
                             <input type="text" name="diachi" class="form-control" value="<?= htmlspecialchars($user['address'] ?? '') ?>">
                         </div>
                     </div>

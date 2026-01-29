@@ -11,13 +11,15 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 }
 $class_id = intval($_GET['id']);
 
+// --- 1. CẬP NHẬT SQL: THÊM u.gender ---
 $sql = "SELECT c.*, 
                u.full_name as tutor_name, 
                u.email as tutor_email, 
                u.phone as tutor_phone,
                u.avatar as tutor_avatar,
+               u.gender,  /* <--- ĐÃ THÊM: Lấy giới tính */
                u.degree, u.major, u.experience, u.address as tutor_address, 
-               u.avg_rating, u.review_count    /* <-- Đã có dấu phẩy ở dòng trên và dòng này */
+               u.avg_rating, u.review_count
         FROM classes c 
         LEFT JOIN users u ON c.tutor_id = u.id 
         WHERE c.id = ?";
@@ -159,8 +161,6 @@ $avatar_url = (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avata
                     <?php endif; ?>
                 </a>
                 <h6 class="fw-bold fs-5 mb-1"><?= htmlspecialchars($tutorName) ?></h6>
-
-
                 
                 <div class="mb-3 mt-1">
                     <?php 
@@ -179,7 +179,9 @@ $avatar_url = (!empty($row['tutor_avatar']) && file_exists("assets/uploads/avata
                         </div>
                     <?php endif; ?>
                 </div>
+
                 <div class="text-start bg-light p-3 rounded mb-3 mt-3 small">
+                    <div class="mb-2"><i class="bi bi-gender-ambiguous text-muted me-2"></i><strong>Giới tính:</strong> <?= htmlspecialchars($row['gender'] ?? 'Chưa cập nhật') ?></div>
                     <div class="mb-2"><i class="bi bi-mortarboard-fill text-muted me-2"></i><strong>Trình độ:</strong> <?= htmlspecialchars($row['degree'] ?? 'Chưa cập nhật') ?></div>
                     <div class="mb-2"><i class="bi bi-book-half text-muted me-2"></i><strong>Chuyên ngành:</strong> <?= htmlspecialchars($row['major'] ?? 'Chưa cập nhật') ?></div>
                     <div><i class="bi bi-geo-alt-fill text-muted me-2"></i><strong>Khu vực:</strong> <?= htmlspecialchars($row['tutor_address'] ?? 'Chưa cập nhật') ?></div>
